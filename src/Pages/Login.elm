@@ -13,6 +13,8 @@ import Route exposing (Route)
 import Shared
 import Shared.Msg
 import View exposing (View)
+import Route.Path
+import Dict exposing (Dict)
 
 
 layout : Layout
@@ -94,6 +96,11 @@ update msg model =
             , Effect.batch
                 [ Effect.save { key = "token", value = E.string res.token }
                 , Effect.fromSharedMsg (Shared.Msg.Login res)
+                , Effect.pushRoute 
+                    { path = Route.Path.Club__ClubId_ { clubId = res.clubId }
+                    , query = Dict.empty
+                    , hash = Nothing
+                    }
                 ]
             )
 
