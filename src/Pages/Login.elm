@@ -1,20 +1,24 @@
 module Pages.Login exposing (Model, Msg, page)
 
 import Api
-import Layout exposing (Layout)
 import Effect exposing (Effect)
 import Html exposing (Html, text)
 import Html.Attributes as Attr
 import Html.Events as Events
 import Http
+import Json.Encode as E
+import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Shared.Msg
 import View exposing (View)
+
 
 layout : Layout
 layout =
     Layout.Navbar
+
 
 page : Shared.Model -> Route () -> Page Model Msg
 page shared route =
@@ -58,11 +62,16 @@ type Field
     = Username
     | Password
 
-fieldToString: Field -> String
+
+fieldToString : Field -> String
 fieldToString field =
     case field of
-        Username -> "Username"
-        Password -> "Password"
+        Username ->
+            "Username"
+
+        Password ->
+            "Password"
+
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
@@ -81,12 +90,17 @@ update msg model =
             ( model, Effect.fromCmd (Api.doLogin model.username model.password GotResponse) )
 
         GotResponse (Ok res) ->
-            ( model, Effect.none )
+            ( model
+            , Effect.batch
+                [ Effect.save { key = "token", value = E.string res.token }
+                , Effect.fromSharedMsg (Shared.Msg.Login res)
+                ]
+            )
 
         GotResponse (Err err) ->
             case err of
                 Http.BadUrl url ->
-                    ( { model | badLogin = "Bad Url" }, Effect.none )
+                    ( { model | badLogin = "Bad Url: " ++ url }, Effect.none )
 
                 Http.BadStatus 401 ->
                     ( { model | badLogin = "Invalid username or password" }, Effect.none )
@@ -105,6 +119,7 @@ update msg model =
 
                 Http.NetworkError ->
                     ( { model | badLogin = "Network error" }, Effect.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -127,7 +142,7 @@ view model =
             [ Html.div []
                 [ Html.h3 [] [ text "Welcome Back!" ]
                 , Html.form [ Events.onSubmit Submit ]
-                    [ viewInput Username "text" model.username 
+                    [ viewInput Username "text" model.username
                     , viewInput Password "password" model.password
                     , Html.a [ Attr.href "reset-password" ] [ text "Forgot your password?" ]
                     , Html.button [] [ text "Login" ]
@@ -142,7 +157,8 @@ view model =
 viewInput : Field -> String -> String -> Html Msg
 viewInput field t v =
     let
-        id = "login-" ++ String.toLower (fieldToString field)
+        id =
+            "login-" ++ String.toLower (fieldToString field)
     in
     Html.div []
         [ Html.label [ Attr.for id ] [ text (fieldToString field) ]
@@ -155,4 +171,3 @@ viewInput field t v =
             ]
             []
         ]
-
