@@ -1,16 +1,18 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Effect exposing (Effect)
-import Html
+import Html exposing (text)
+import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-import Layout exposing (Layout)
 
-layout: Layout
+
+layout : Layout
 layout =
     Layout.Navbar
+
 
 page : Shared.Model -> Route () -> Page Model Msg
 page shared route =
@@ -70,5 +72,5 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     { title = "Pages.Home_"
-    , body = [ Html.text "/" ]
+    , body = [ Html.text "hello!" ]
     }

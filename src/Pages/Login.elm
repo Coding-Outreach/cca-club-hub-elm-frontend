@@ -14,7 +14,7 @@ import Shared
 import Shared.Msg
 import View exposing (View)
 import Route.Path
-import Dict exposing (Dict)
+import Dict
 
 
 layout : Layout
