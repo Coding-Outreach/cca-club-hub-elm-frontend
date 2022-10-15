@@ -1,6 +1,7 @@
 module Pages.Login exposing (Model, Msg, page)
 
 import Api
+import Element as E
 import Effect exposing (Effect)
 import Html exposing (Html, text)
 import Html.Attributes as Attr
@@ -144,8 +145,7 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     { title = "Pages.Login"
-    , body =
-        [ Html.div []
+    , body = E.html (Html.div []
             [ Html.div []
                 [ Html.h3 [] [ text "Welcome Back!" ]
                 , Html.form [ Events.onSubmit Submit ]
@@ -156,8 +156,8 @@ view model =
                     ]
                 , Html.div [] [ text model.badLogin ]
                 ]
-            ]
-        ]
+            ])
+        
     }
 
 

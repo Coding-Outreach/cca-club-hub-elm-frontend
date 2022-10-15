@@ -13,7 +13,7 @@ type Status value
 
 backendUrl : String
 backendUrl =
-    "https://c6cf53f0-37e5-42b6-b89f-51d11e7d14fe.mock.pstmn.io"
+    "https://c6cf53f0-37e5-42b6-b89f-51d11e7d14fe.mock.pstmn.io/api"
 
 
 type alias LoginResponse =
@@ -26,7 +26,7 @@ doLogin : String -> String -> (Result Http.Error LoginResponse -> msg) -> Cmd ms
 doLogin username password msg =
     Http.post
         { body = Http.jsonBody (E.object [ ( "username", E.string username ), ( "password", E.string password ) ])
-        , url = backendUrl ++ "/api/auth/login"
+        , url = backendUrl ++ "/auth/login"
         , expect = Http.expectJson msg loginResponseDecoder
         }
 
@@ -55,7 +55,7 @@ type alias Social =
 getClubInfo : String -> (Result Http.Error ClubInfoResponse -> msg) -> Cmd msg
 getClubInfo id msg =
     Http.get
-        { url = backendUrl ++ "/api/club/info/" ++ id
+        { url = backendUrl ++ "/club/info/" ++ id
         , expect = Http.expectJson msg clubInfoResponseDecoder
         }
 

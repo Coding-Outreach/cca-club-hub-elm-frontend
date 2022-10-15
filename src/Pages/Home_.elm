@@ -1,7 +1,7 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Effect exposing (Effect)
-import Html exposing (text)
+import Element as E
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
@@ -72,5 +72,5 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     { title = "Pages.Home_"
-    , body = [ Html.text "hello!" ]
+    , body = E.text "Hello World!"
     }

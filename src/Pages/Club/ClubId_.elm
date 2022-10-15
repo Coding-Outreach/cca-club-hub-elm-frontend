@@ -1,20 +1,21 @@
 module Pages.Club.ClubId_ exposing (Model, Msg, page)
 
 import Api
-import Layout exposing (Layout)
 import Effect exposing (Effect)
+import Element as E exposing (Element)
 import Html exposing (text)
 import Html.Attributes as Attr
 import Http
+import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
 
+
 layout : Layout
 layout =
     Layout.Navbar
-
 
 
 page : Shared.Model -> Route { clubId : String } -> Page Model Msg
@@ -79,30 +80,35 @@ subscriptions model =
 
 
 -- VIEW
--- We will need to pass in the shared model to check if the person is logged in and can edit.
 
 
 view : Model -> View Msg
 view model =
     { title = "Pages.Club.ClubId_"
     , body =
-        [ case model.clubInfo of
-            Api.Loading ->
-                text "Loading..."
+        E.html
+            (case model.clubInfo of
+                Api.Loading ->
+                    text "Loading..."
 
-            Api.Failure err ->
-                text ("Oh no! Something went wrong: " ++ Debug.toString err)
+                Api.Failure err ->
+                    case err of
+                        Http.BadStatus 404 ->
+                            text "Club doesn't exist"
 
-            Api.Success info ->
-                Html.div []
-                    [ Html.img
-                        [ Attr.src (Maybe.withDefault "" info.profilePictureUrl)
-                        , Attr.alt (info.clubName ++ "'s profile picture")
+                        _ ->
+                            text ("Oh no! Something went wrong: " ++ Debug.toString err)
+
+                Api.Success info ->
+                    Html.div []
+                        [ Html.img
+                            [ Attr.src (Maybe.withDefault "" info.profilePictureUrl)
+                            , Attr.alt (info.clubName ++ "'s profile picture")
+                            ]
+                            []
+                        , Html.h1 [] [ text info.clubName ]
+                        , Html.p [] [ text (Maybe.withDefault "" info.description) ]
+                        , Html.em [] [ text info.meetTime ]
                         ]
-                        []
-                    , Html.h1 [] [ text info.clubName ]
-                    , Html.p [] [ text (Maybe.withDefault "" info.description) ]
-                    , Html.em [] [ text info.meetTime ]
-                    ]
-        ]
+            )
     }
