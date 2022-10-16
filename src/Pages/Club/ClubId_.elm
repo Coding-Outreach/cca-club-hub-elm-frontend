@@ -1,11 +1,16 @@
 module Pages.Club.ClubId_ exposing (Model, Msg, page)
 
 import Api
+import Color exposing (..)
 import Effect exposing (Effect)
-import Element as E exposing (Element)
-import Html exposing (text)
-import Html.Attributes as Attr
+import Element as E exposing (Element, el, text)
+import Element.Background as Bg
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input as Input
+import Element.Region as Region
 import Http
+import Icon exposing (icon)
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
@@ -84,31 +89,98 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Pages.Club.ClubId_"
-    , body =
-        E.html
-            (case model.clubInfo of
-                Api.Loading ->
-                    text "Loading..."
-
-                Api.Failure err ->
-                    case err of
-                        Http.BadStatus 404 ->
-                            text "Club doesn't exist"
-
-                        _ ->
-                            text ("Oh no! Something went wrong: " ++ Debug.toString err)
-
+    let
+        title =
+            case model.clubInfo of
                 Api.Success info ->
-                    Html.div []
-                        [ Html.img
-                            [ Attr.src (Maybe.withDefault "" info.profilePictureUrl)
-                            , Attr.alt (info.clubName ++ "'s profile picture")
+                    info.clubName
+
+                _ ->
+                    model.clubId
+    in
+    { title = title
+    , body =
+        case model.clubInfo of
+            Api.Loading ->
+                el [ E.centerX, E.centerY ] (text "Loading...")
+
+            Api.Failure err ->
+                case err of
+                    Http.BadStatus 404 ->
+                        E.column [ E.centerX, E.centerY ]
+                            [ text "Club not found!"
+                            , E.link [ Font.color red_300, Font.underline, E.centerX ] { url = "/", label = text "Go Back" }
                             ]
-                            []
-                        , Html.h1 [] [ text info.clubName ]
-                        , Html.p [] [ text (Maybe.withDefault "" info.description) ]
-                        , Html.em [] [ text info.meetTime ]
+
+                    _ ->
+                        el [ E.centerX, E.centerY ] (text ("Oh no! Something went wrong: " ++ Debug.toString err))
+
+            Api.Success info ->
+                E.column [ E.padding 32, E.width E.fill, E.height E.fill ]
+                    [ el [ E.width E.fill, E.height (E.px 128), Bg.color red_100, E.padding 16 ] (text "")
+                    , E.row
+                        [ E.width E.fill
+                        , Bg.color mono_600
+                        , E.paddingEach
+                            { top = 72
+                            , right = 32
+                            , bottom = 32
+                            , left = 32
+                            }
+                        , E.above (viewProfilePicture (Maybe.withDefault "" info.profilePictureUrl) info.clubName)
                         ]
-            )
+                        [ E.column [ E.spacing 12 ]
+                            [ el [ Font.bold, Font.size 32 ] (text info.clubName)
+                            , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ info.meetTime)) ]
+                            , el
+                                [ E.paddingEach
+                                    { top = 16
+                                    , right = 0
+                                    , bottom = 0
+                                    , left = 0
+                                    }
+                                ]
+                                (text (Maybe.withDefault "" info.description))
+                            , E.wrappedRow [ E.spacing 8, E.width (E.px (30 * 16)) ] (List.map viewCategory info.categories)
+                            ]
+                            -- Wrapping row for this as well?
+                        , E.row [ E.alignRight, E.alignTop, E.spacing 8 ]
+                            [ E.column [ E.spacing 8, E.alignTop ] [ text "real twitter", text "real email" ]
+                            , E.column [ E.spacing 8, E.alignTop ] [ text "real discord" ] 
+                            ]
+                        ]
+                    ]
     }
+
+
+viewProfilePicture : String -> String -> Element msg
+viewProfilePicture url clubName =
+    E.image
+        [ E.centerX
+        , Border.rounded 160
+        , E.clip
+        , E.width (E.px 160)
+        , E.height (E.px 160)
+        , E.alignLeft
+        , E.moveDown 64
+        , E.moveRight 32
+        , Border.width 8
+        , Border.color mono_600
+        ]
+        { src = url
+        , description = clubName ++ "'s profile picture"
+        }
+
+
+viewCategory : String -> Element Msg
+viewCategory category =
+    E.link
+        [ E.paddingXY 12 6
+        , Border.rounded 16
+        , Bg.color red_100
+        , Font.color red_700
+        , Font.bold
+        , Font.size 12
+        , E.mouseOver [ Bg.color red_200 ]
+        ]
+        { url = "/tag/" ++ category, label = text (String.toUpper category) }

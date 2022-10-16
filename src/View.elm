@@ -13,6 +13,7 @@ module View exposing
 -}
 
 import Browser
+import Color exposing (..)
 import Element as E exposing (Element)
 import Html
 
@@ -28,8 +29,19 @@ so it works with Elm's expected `Browser.Document msg` type.
 -}
 toBrowserDocument : View msg -> Browser.Document msg
 toBrowserDocument view =
-    Browser.Document view.title
-        [ E.layout [] view.body ]
+    Browser.Document ("CCA Club Hub | " ++ view.title)
+        [ E.layoutWith
+            { options =
+                [ E.focusStyle
+                    { borderColor = Just red_500
+                    , backgroundColor = Nothing
+                    , shadow = Nothing
+                    }
+                ]
+            }
+            []
+            view.body
+        ]
 
 
 {-| Used internally by Elm Land to wire up your pages together.

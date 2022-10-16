@@ -71,6 +71,6 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Pages.Home_"
+    { title = "Home"
     , body = E.text "Hello World!"
     }
