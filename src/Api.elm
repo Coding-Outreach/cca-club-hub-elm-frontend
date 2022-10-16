@@ -37,20 +37,25 @@ loginResponseDecoder =
 
 
 type alias ClubInfoResponse =
-    { id: String
-    , clubName: String
-    , email: String
-    , meetTime: String
-    , description: Maybe String
-    , profilePictureUrl: Maybe String
-    , socials: List Social
-    , categories: List String
+    { id : String
+    , clubName : String
+    , meetTime : String
+    , description : Maybe String
+    , about : String
+    , profilePictureUrl : Maybe String
+    , socials : Socials
+    , categories : List String
     }
 
-type alias Social =
-    { name: String
-    , link: String
+
+type alias Socials =
+    { email : String
+    , website : Maybe String
+    , googleClassroom : Maybe String
+    , discord : Maybe String
+    , instagram : Maybe String
     }
+
 
 getClubInfo : String -> (Result Http.Error ClubInfoResponse -> msg) -> Cmd msg
 getClubInfo id msg =
@@ -66,13 +71,54 @@ clubInfoResponseDecoder =
         ClubInfoResponse
         (D.field "id" D.string)
         (D.field "clubName" D.string)
-        (D.field "email" D.string)
         (D.field "meetTime" D.string)
         (D.field "description" (D.maybe D.string))
+        (D.field "about" D.string)
         (D.field "profilePictureUrl" (D.maybe D.string))
-        (D.field "socials" (D.list socialDecoder))
+        (D.field "socials" socialsDecoder)
         (D.field "categories" (D.list D.string))
 
 
-socialDecoder : D.Decoder Social
-socialDecoder = D.map2 Social (D.field "name" D.string) (D.field "link" D.string)
+socialsDecoder : D.Decoder Socials
+socialsDecoder =
+    D.map5 Socials
+        (D.field "email" D.string)
+        (D.field "website" (D.maybe D.string))
+        (D.field "googleClassroom" (D.maybe D.string))
+        (D.field "discord" (D.maybe D.string))
+        (D.field "instagram" (D.maybe D.string))
+
+
+type alias ClubListResponse =
+    List ClubListItem
+
+
+type alias ClubListItem =
+    { id : String
+    , clubName : String
+    , meetTime : String
+    , description : Maybe String
+    , profilePictureUrl : Maybe String
+    , categories : List String
+    }
+
+
+getClubList : (Result Http.Error ClubListResponse -> msg) -> Cmd msg
+getClubList msg =
+    Http.get
+        { url = backendUrl ++ "/club/list"
+        , expect = Http.expectJson msg clubListResponseDecoder
+        }
+
+
+clubListResponseDecoder : D.Decoder ClubListResponse
+clubListResponseDecoder =
+    D.list
+        (D.map6 ClubListItem
+            (D.field "id" D.string)
+            (D.field "clubName" D.string)
+            (D.field "meetTime" D.string)
+            (D.field "description" (D.maybe D.string))
+            (D.field "profilePictureUrl" (D.maybe D.string))
+            (D.field "categories" (D.list D.string))
+        )

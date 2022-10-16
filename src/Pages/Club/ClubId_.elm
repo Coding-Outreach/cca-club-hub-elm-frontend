@@ -12,6 +12,7 @@ import Element.Region as Region
 import Http
 import Icon exposing (icon)
 import Layout exposing (Layout)
+import Markdown
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
@@ -130,7 +131,7 @@ view model =
                         , E.above (viewProfilePicture (Maybe.withDefault "" info.profilePictureUrl) info.clubName)
                         ]
                         [ E.column [ E.spacing 12 ]
-                            [ el [ Font.bold, Font.size 32 ] (text info.clubName)
+                            [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text info.clubName)
                             , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ info.meetTime)) ]
                             , el
                                 [ E.paddingEach
@@ -141,12 +142,34 @@ view model =
                                     }
                                 ]
                                 (text (Maybe.withDefault "" info.description))
-                            , E.wrappedRow [ E.spacing 8, E.width (E.px (30 * 16)) ] (List.map viewCategory info.categories)
                             ]
-                            -- Wrapping row for this as well?
+
+                        -- Wrapping row for this as well?
                         , E.row [ E.alignRight, E.alignTop, E.spacing 8 ]
-                            [ E.column [ E.spacing 8, E.alignTop ] [ text "real twitter", text "real email" ]
-                            , E.column [ E.spacing 8, E.alignTop ] [ text "real discord" ] 
+                            [ E.column [ E.spacing 8, E.alignTop ] []
+                            , E.column [ E.spacing 8, E.alignTop ] []
+                            ]
+                        ]
+                    , E.row [ E.padding 32, E.width E.fill ]
+                        [ E.column
+                            [ E.spacing 8
+                            , E.width (E.fillPortion 4)
+                            ]
+                            (el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
+                                :: List.map E.html (Markdown.toHtml Nothing info.about)
+                             -- We can't just throw this into the E.html since links need to look nice, another option is to add a css file specificially for markdown
+                            )
+                        , E.column
+                            [ E.spacing 8
+                            , E.alignRight
+                            , E.alignTop
+                            , E.width (E.fillPortion 1)
+                            ]
+                            [ el [ Font.color mono_300, Font.size 12, Font.bold ] (text "TAGS")
+                            , E.wrappedRow
+                                [ E.spacing 8
+                                ]
+                                (List.map viewCategory info.categories)
                             ]
                         ]
                     ]
