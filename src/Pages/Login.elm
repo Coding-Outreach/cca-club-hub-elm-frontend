@@ -54,12 +54,7 @@ init : Shared.Model -> () -> ( Model, Effect Msg )
 init shared () =
     ( Model "" "" False ""
     , if shared.loginStatus /= Shared.NotLoggedIn then
-        Effect.pushRoute
-            { path = Route.Path.Home_
-            , query = Dict.empty
-            , hash = Nothing
-            }
-
+        Effect.pushUrlPath "/"
       else
         Effect.none
     )

@@ -128,7 +128,7 @@ view model =
                             , bottom = 32
                             , left = 32
                             }
-                        , E.above (viewProfilePicture (Maybe.withDefault "" info.profilePictureUrl) info.clubName)
+                        , E.above (viewProfilePicture info.profilePictureUrl info.clubName)
                         ]
                         [ E.column [ E.spacing 12 ]
                             [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text info.clubName)

@@ -42,7 +42,7 @@ type alias ClubInfoResponse =
     , meetTime : String
     , description : Maybe String
     , about : String
-    , profilePictureUrl : Maybe String
+    , profilePictureUrl : String
     , socials : Socials
     , categories : List String
     }
@@ -74,7 +74,7 @@ clubInfoResponseDecoder =
         (D.field "meetTime" D.string)
         (D.field "description" (D.maybe D.string))
         (D.field "about" D.string)
-        (D.field "profilePictureUrl" (D.maybe D.string))
+        (D.field "profilePictureUrl" D.string)
         (D.field "socials" socialsDecoder)
         (D.field "categories" (D.list D.string))
 
@@ -98,7 +98,7 @@ type alias ClubListItem =
     , clubName : String
     , meetTime : String
     , description : Maybe String
-    , profilePictureUrl : Maybe String
+    , profilePictureUrl : String
     , categories : List String
     }
 
@@ -119,6 +119,6 @@ clubListResponseDecoder =
             (D.field "clubName" D.string)
             (D.field "meetTime" D.string)
             (D.field "description" (D.maybe D.string))
-            (D.field "profilePictureUrl" (D.maybe D.string))
+            (D.field "profilePictureUrl" D.string)
             (D.field "categories" (D.list D.string))
         )

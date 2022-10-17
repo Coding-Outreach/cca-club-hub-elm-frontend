@@ -20,7 +20,6 @@ import Route exposing (Route)
 import Shared.Msg exposing (Msg(..))
 
 
-
 -- FLAGS
 
 
@@ -32,7 +31,6 @@ type alias Flags =
 decoder : D.Decoder Flags
 decoder =
     D.map Flags (D.maybe (D.field "token" D.string))
-
 
 
 -- INIT
@@ -47,7 +45,7 @@ type LoginStatus
     = NotLoggedIn
     | LoggedIn String
 
-
+-- You can actually decode the JWT to get the club id
 init : Result D.Error Flags -> Route () -> ( Model, Effect Msg )
 init flagsResult route =
     let
@@ -82,10 +80,9 @@ update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
         Login res ->
-            ( model
+            ( { model | loginStatus = LoggedIn res.token }
             , Effect.none
             )
-
 
 
 -- SUBSCRIPTIONS

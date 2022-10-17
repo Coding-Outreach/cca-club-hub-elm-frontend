@@ -15,7 +15,8 @@
             "elm/url": "1.0.0",
             "mdgriffith/elm-ui": "1.1.8",
             "pablohirafuji/elm-markdown": "2.0.5",
-            "simonh1000/elm-jwt": "7.1.1"
+            "simonh1000/elm-jwt": "7.1.1",
+            "tripokey/elm-fuzzy": "5.2.1"
         },
         "indirect": {
             "danfishgold/base64-bytes": "1.1.0",
