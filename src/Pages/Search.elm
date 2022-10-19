@@ -1,4 +1,4 @@
-module Pages.Clubs exposing (Model, Msg, page)
+module Pages.Search exposing (Model, Msg, page)
 
 import Api
 import Color exposing (..)
