@@ -11,7 +11,8 @@ import Element.Input as Input
 import Element.Region as Region
 import Fuzzy
 import Http
-import Icon exposing (icon)
+import Components.Input exposing (inputBoxStyles)
+import Components.Icon exposing (icon)
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
@@ -96,10 +97,7 @@ view model =
     , body =
         E.column [ E.padding 32, E.width E.fill, E.height E.fill, E.centerX ]
             [ Input.search
-                [ Font.color mono_900
-                , E.width (E.fill |> E.maximum (16 * 36))
-                , E.centerX
-                ]
+                (inputBoxStyles ++ [ E.width (E.fill |> E.maximum (16 * 36)), E.centerX])
                 { onChange = SearchTermChange
                 , text = model.searchTerm
                 , placeholder = Nothing

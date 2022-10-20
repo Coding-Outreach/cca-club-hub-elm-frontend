@@ -2,6 +2,8 @@ module Pages.Login exposing (Model, Msg, page)
 
 import Api
 import Color exposing (..)
+import Components.Icon exposing (icon)
+import Components.Input exposing (inputBoxStyles)
 import Dict
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
@@ -12,7 +14,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
 import Http
-import Icon exposing (icon)
 import Json.Encode as E
 import Layout exposing (Layout)
 import Page exposing (Page)
@@ -55,6 +56,7 @@ init shared () =
     ( Model "" "" False ""
     , if shared.loginStatus /= Shared.NotLoggedIn then
         Effect.pushUrlPath "/"
+
       else
         Effect.none
     )
@@ -171,27 +173,27 @@ view model =
                 , Region.heading 1
                 ]
                 (E.text "Welcome Back!")
-            , Input.username [ Font.color mono_900 ]
+            , Input.username inputBoxStyles
                 { onChange = FieldUpdate Username
                 , text = model.username
                 , placeholder = Nothing
                 , label = Input.labelAbove [ Font.bold ] (text "USERNAME")
                 }
             , Input.currentPassword
-                [ Font.color mono_900
-                , E.inFront
+                (E.inFront
                     (el
                         [ E.centerY
                         , E.alignRight
                         , E.paddingXY 8 0
                         , Font.color mono_200
-                        , E.mouseOver [Font.color mono_400]
+                        , E.mouseOver [ Font.color mono_400 ]
                         , E.pointer
                         , Events.onClick ToggleShow
                         ]
                         (icon ("fa-regular " ++ eyeIcon))
                     )
-                ]
+                    :: inputBoxStyles
+                )
                 { onChange = FieldUpdate Password
                 , text = model.password
                 , placeholder = Nothing

@@ -10,7 +10,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
 import Http
-import Icon exposing (icon)
+import Components.Icon exposing (icon)
 import Layout exposing (Layout)
 import Markdown
 import Page exposing (Page)
