@@ -2,6 +2,8 @@ module Pages.Search exposing (Model, Msg, page)
 
 import Api
 import Color exposing (..)
+import Components.Icon exposing (icon)
+import Components.Input exposing (inputBoxStyles)
 import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
 import Element.Background as Bg
@@ -11,8 +13,6 @@ import Element.Input as Input
 import Element.Region as Region
 import Fuzzy
 import Http
-import Components.Input exposing (inputBoxStyles)
-import Components.Icon exposing (icon)
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
@@ -97,7 +97,7 @@ view model =
     , body =
         E.column [ E.padding 32, E.width E.fill, E.height E.fill, E.centerX ]
             [ Input.search
-                (inputBoxStyles ++ [ E.width (E.fill |> E.maximum (16 * 36)), E.centerX])
+                (inputBoxStyles ++ [ E.width (E.fill |> E.maximum (16 * 36)), E.centerX ])
                 { onChange = SearchTermChange
                 , text = model.searchTerm
                 , placeholder = Nothing
@@ -150,7 +150,7 @@ scoreSearchTerm : String -> Api.ClubListItem -> Int
 scoreSearchTerm searchTerm club =
     Fuzzy.match
         []
-        [" "]
+        [ " " ]
         (String.toLower searchTerm)
         (String.toLower (club.clubName ++ Maybe.withDefault "" club.description ++ club.meetTime))
         |> .score

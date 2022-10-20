@@ -1,10 +1,13 @@
 module Pages.NotFound_ exposing (page)
 
-import View exposing (View)
 import Layout exposing (Layout)
+import View exposing (View)
+
 
 layout : Layout
-layout = Layout.Navbar
+layout =
+    Layout.Navbar
+
 
 page : View msg
 page =

@@ -2,6 +2,7 @@ module Pages.Club.ClubId_ exposing (Model, Msg, page)
 
 import Api
 import Color exposing (..)
+import Components.Icon exposing (icon)
 import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
 import Element.Background as Bg
@@ -10,7 +11,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
 import Http
-import Components.Icon exposing (icon)
 import Layout exposing (Layout)
 import Markdown
 import Page exposing (Page)
@@ -36,6 +36,8 @@ page shared route =
 
 
 -- INIT
+-- do we need clubId? its already in clubInfo, i guess for the title, but not really
+-- TODO refactor Model into a Api.Status Api.ClubInfoResponse
 
 
 type alias Model =
@@ -114,7 +116,7 @@ view model =
                             ]
 
                     _ ->
-                        el [ E.centerX, E.centerY ] (text ("Oh no! Something went wrong: " ++ Debug.toString err))
+                        el [ E.centerX, E.centerY ] (text ("Something went wrong: " ++ Debug.toString err))
 
             Api.Success info ->
                 E.column [ E.padding 32, E.width E.fill, E.height E.fill ]

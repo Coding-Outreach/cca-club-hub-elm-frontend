@@ -14,11 +14,12 @@ module Shared exposing
 -}
 
 import Api
-import Token
 import Effect exposing (Effect)
 import Json.Decode as D
 import Route exposing (Route)
 import Shared.Msg exposing (Msg(..))
+import Token
+
 
 
 -- FLAGS
@@ -34,6 +35,7 @@ decoder =
     D.map Flags (D.maybe (D.field "token" D.string))
 
 
+
 -- INIT
 
 
@@ -46,7 +48,11 @@ type LoginStatus
     = NotLoggedIn
     | LoggedIn { token : String, clubId : String }
 
+
+
 -- You can actually decode the JWT to get the club id
+
+
 init : Result D.Error Flags -> Route () -> ( Model, Effect Msg )
 init flagsResult route =
     let
@@ -54,8 +60,6 @@ init flagsResult route =
         flags =
             flagsResult
                 |> Result.withDefault { token = Nothing }
-
-
 
         loginStatus : LoginStatus
         loginStatus =
@@ -67,6 +71,7 @@ init flagsResult route =
                     case Token.getClubIdFromToken token of
                         Ok clubId ->
                             LoggedIn { token = token, clubId = clubId }
+
                         Err _ ->
                             NotLoggedIn
     in
@@ -90,6 +95,7 @@ update route msg model =
             ( { model | loginStatus = LoggedIn { token = res.token, clubId = res.clubId } }
             , Effect.none
             )
+
 
 
 -- SUBSCRIPTIONS

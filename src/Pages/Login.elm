@@ -177,7 +177,7 @@ view model =
                 { onChange = FieldUpdate Username
                 , text = model.username
                 , placeholder = Nothing
-                , label = Input.labelAbove [ Font.bold ] (text "USERNAME")
+                , label = Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text "USERNAME")
                 }
             , Input.currentPassword
                 (E.inFront
@@ -197,7 +197,7 @@ view model =
                 { onChange = FieldUpdate Password
                 , text = model.password
                 , placeholder = Nothing
-                , label = Input.labelAbove [ Font.bold ] (text "PASSWORD")
+                , label = Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text "PASSWORD")
                 , show = model.showPassword
                 }
             , E.link [ Font.underline, Font.color red_400 ] { url = "/forgot-password", label = text "Forgot your password?" }

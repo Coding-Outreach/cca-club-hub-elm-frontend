@@ -14,9 +14,11 @@ tokenDecoder : D.Decoder TokenPayload
 tokenDecoder =
     D.map2 TokenPayload (D.field "clubId" D.string) (D.field "exp" D.int)
 
+
 decodeToken : String -> Result Jwt.JwtError TokenPayload
 decodeToken =
-    Jwt.decodeToken tokenDecoder 
+    Jwt.decodeToken tokenDecoder
+
 
 getClubIdFromToken : String -> Result Jwt.JwtError String
 getClubIdFromToken token =

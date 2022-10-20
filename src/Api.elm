@@ -11,6 +11,20 @@ type Status value
     | Failure Http.Error
 
 
+map : (a -> b) -> Status a -> Status b
+map fn status =
+    case status of
+        Success value ->
+            Success (fn value)
+
+        -- We can't do `_ -> status` due to some type issues.
+        Loading ->
+            Loading
+
+        Failure err ->
+            Failure err
+
+
 backendUrl : String
 backendUrl =
     "https://c6cf53f0-37e5-42b6-b89f-51d11e7d14fe.mock.pstmn.io/api"
