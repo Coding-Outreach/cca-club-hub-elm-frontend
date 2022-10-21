@@ -36,7 +36,12 @@ page shared route =
 
 
 type alias Model =
-    Api.Status { clubName : String, description : String }
+    Api.Status
+        { clubName : String
+        , description : String
+        , meetTime : String
+        , about : String
+        }
 
 
 init : Shared.Model -> () -> ( Model, Effect Msg )
@@ -57,7 +62,9 @@ init shared () =
 
 type Field
     = ClubName String
+    | MeetTime String
     | Description String
+    | About String
 
 
 type Msg
@@ -72,6 +79,8 @@ update msg model =
             ( Api.Success
                 { clubName = info.clubName
                 , description = Maybe.withDefault "" info.description
+                , meetTime = info.meetTime
+                , about = info.about
                 }
             , Effect.none
             )
@@ -82,12 +91,22 @@ update msg model =
             )
 
         FieldUpdate (ClubName name) ->
-            ( Api.map (\m -> { m | clubName = name }) model
+            ( Api.map (\m -> { m | clubName = String.left 32 name }) model
             , Effect.none
             )
 
         FieldUpdate (Description description) ->
-            ( Api.map (\m -> { m | description = String.left 280 description }) model
+            ( Api.map (\m -> { m | description = String.left 250 description }) model
+            , Effect.none
+            )
+
+        FieldUpdate (MeetTime meetTime) ->
+            ( Api.map (\m -> { m | meetTime = String.left 60 meetTime }) model
+            , Effect.none
+            )
+
+        FieldUpdate (About about) ->
+            ( Api.map (\m -> { m | about = about }) model
             , Effect.none
             )
 
@@ -118,31 +137,67 @@ view model =
 
             Api.Success info ->
                 E.column [ E.padding 32, E.width (E.fill |> E.maximum (16 * 36)), E.height E.fill, E.centerX, E.spacing 16 ]
-                    [ Input.text inputBoxStyles
-                        { onChange = ClubName >> FieldUpdate
+                    [ el [ Font.size 24, Font.bold ] (text "General")
+                    , Input.text inputBoxStyles
+                        { onChange = FieldUpdate << ClubName
                         , text = info.clubName
                         , placeholder = Nothing
-                        , label = Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text "DISPLAY NAME")
+                        , label = label "DISPLAY NAME"
                         }
-
-                    -- add character limits
+                    , Input.text inputBoxStyles
+                        { onChange = FieldUpdate << MeetTime
+                        , text = info.meetTime
+                        , placeholder = Nothing
+                        , label = label "MEET TIME"
+                        }
                     , Input.multiline
-                        (E.inFront
-                            (el
-                                [ E.alignBottom
-                                , E.alignRight
-                                , E.padding 8
-                                , Font.color mono_400
-                                ]
-                                (text (String.fromInt (280 - String.length info.description)))
-                            )
-                            :: inputBoxStyles
-                        )
-                        { onChange = Description >> FieldUpdate
+                        (characterLimit 250 info.description :: inputBoxStyles)
+                        { onChange = FieldUpdate << Description
                         , text = info.description
                         , placeholder = Nothing
-                        , label = Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text "DESCRIPTION")
+                        , label = label "DESCRIPTION"
                         , spellcheck = True
                         }
+                    , Input.multiline
+                        (E.height (E.shrink |> E.minimum (16 * 16)) :: characterLimit 250 info.description :: inputBoxStyles)
+                        { onChange = FieldUpdate << About
+                        , text = info.about
+                        , placeholder = Nothing
+                        , label = label "ABOUT"
+                        , spellcheck = True
+                        }
+                    , E.paragraph []
+                        [ E.link [ Font.underline, Font.color red_400 ] { url = "https://www.markdownguide.org/", label = text "Markdown" }
+                        , text " is accepted!"
+                        ]
                     ]
     }
+
+
+label : String -> Input.Label msg
+label name =
+    Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text name)
+
+
+characterLimit : Int -> String -> E.Attribute msg
+characterLimit limit current =
+    let
+        remainingCharacters =
+            limit - String.length current
+
+        fontColor =
+            if remainingCharacters == 0 then
+                red_400
+
+            else
+                mono_400
+    in
+    E.inFront
+        (el
+            [ E.alignBottom
+            , E.alignRight
+            , E.padding 8
+            , Font.color fontColor
+            ]
+            (text (String.fromInt remainingCharacters))
+        )
