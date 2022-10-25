@@ -14,9 +14,12 @@ module Shared exposing
 -}
 
 import Api
+import Dict
 import Effect exposing (Effect)
 import Json.Decode as D
+import Json.Encode as E
 import Route exposing (Route)
+import Route.Path
 import Shared.Msg exposing (Msg(..))
 import Token
 
@@ -92,9 +95,21 @@ update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
         Login res ->
-            ( { model | loginStatus = LoggedIn { token = res.token, clubId = res.clubId } }
-            , Effect.none
-            )
+            case Token.getClubIdFromToken res.token of
+                Ok clubId ->
+                    ( { model | loginStatus = LoggedIn { token = res.token, clubId = clubId } }
+                    , Effect.batch
+                        [ Effect.save { key = "token", value = E.string res.token }
+                        , Effect.pushRoute
+                            { path = Route.Path.Club__ClubId_ { clubId = clubId }
+                            , query = Dict.empty
+                            , hash = Nothing
+                            }
+                        ]
+                    )
+
+                Err _ ->
+                    ( { model | loginStatus = NotLoggedIn }, Effect.none )
 
 
 

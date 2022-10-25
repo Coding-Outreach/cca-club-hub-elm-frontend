@@ -14,7 +14,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
 import Http
-import Json.Encode as E
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
@@ -106,13 +105,7 @@ update msg model =
         GotResponse (Ok res) ->
             ( model
             , Effect.batch
-                [ Effect.save { key = "token", value = E.string res.token }
-                , Effect.fromSharedMsg (Shared.Msg.Login res)
-                , Effect.pushRoute
-                    { path = Route.Path.Club__ClubId_ { clubId = res.clubId }
-                    , query = Dict.empty
-                    , hash = Nothing
-                    }
+                [ Effect.fromSharedMsg (Shared.Msg.Login res)
                 ]
             )
 
