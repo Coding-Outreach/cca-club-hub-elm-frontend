@@ -31,8 +31,7 @@ backendUrl =
 
 
 type alias LoginResponse =
-    { clubId : String
-    , token : String
+    { token : String
     }
 
 
@@ -47,7 +46,7 @@ doLogin username password msg =
 
 loginResponseDecoder : D.Decoder LoginResponse
 loginResponseDecoder =
-    D.map2 LoginResponse (D.field "clubId" D.string) (D.field "token" D.string)
+    D.map LoginResponse (D.field "token" D.string)
 
 
 type alias ClubInfoResponse =

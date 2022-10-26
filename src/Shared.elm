@@ -52,10 +52,6 @@ type LoginStatus
     | LoggedIn { token : String, clubId : String }
 
 
-
--- You can actually decode the JWT to get the club id
-
-
 init : Result D.Error Flags -> Route () -> ( Model, Effect Msg )
 init flagsResult route =
     let

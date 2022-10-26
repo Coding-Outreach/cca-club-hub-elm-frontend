@@ -3,14 +3,14 @@ module Pages.Search exposing (Model, Msg, page)
 import Api
 import Color exposing (..)
 import Components.Icon exposing (icon)
-import Components.Input exposing (inputBoxStyles)
+import Components.Input as CInput
 import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
 import Element.Background as Bg
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input
 import Element.Region as Region
+import Element.Input as Input
 import Fuzzy
 import Http
 import Layout exposing (Layout)
@@ -97,7 +97,7 @@ view model =
     , body =
         E.column [ E.padding 32, E.width E.fill, E.height E.fill, E.centerX ]
             [ Input.search
-                (inputBoxStyles ++ [ E.width (E.fill |> E.maximum (16 * 36)), E.centerX ])
+                ([ E.width (E.fill |> E.maximum (16 * 36)), E.centerX ] ++ CInput.inputBoxStyles)
                 { onChange = SearchTermChange
                 , text = model.searchTerm
                 , placeholder = Nothing

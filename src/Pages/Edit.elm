@@ -2,17 +2,21 @@ module Pages.Edit exposing (Model, Msg, page)
 
 import Api
 import Color exposing (..)
-import Components.Input exposing (inputBoxStyles)
+import Components.Link exposing (linkStyles)
+import Components.Input as CInput
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
 import Element.Background as Input
+import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input
+import File exposing (File)
+import File.Select as Select
 import Http
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Task
 import View exposing (View)
 
 
@@ -38,6 +42,7 @@ page shared route =
 type alias Model =
     Api.Status
         { clubName : String
+        , profilePictureUrl : String
         , description : String
         , meetTime : String
         , about : String
@@ -62,6 +67,7 @@ init shared () =
 
 type Field
     = ClubName String
+    | ProfilePictureUrl String
     | MeetTime String
     | Description String
     | About String
@@ -70,6 +76,8 @@ type Field
 type Msg
     = GotInitialData (Result Http.Error Api.ClubInfoResponse)
     | FieldUpdate Field
+    | ProfilePictureRequested
+    | ProfilePictureLoaded File
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -78,6 +86,7 @@ update msg model =
         GotInitialData (Ok info) ->
             ( Api.Success
                 { clubName = info.clubName
+                , profilePictureUrl = info.profilePictureUrl
                 , description = Maybe.withDefault "" info.description
                 , meetTime = info.meetTime
                 , about = info.about
@@ -94,6 +103,22 @@ update msg model =
             ( Api.map (\m -> { m | clubName = String.left 32 name }) model
             , Effect.none
             )
+        
+        ProfilePictureRequested ->
+            ( model
+            , Effect.fromCmd (Select.file ["image/png", "image/jpeg", "image/webp"] ProfilePictureLoaded)
+            )
+
+        ProfilePictureLoaded file ->
+            ( model
+            , Effect.fromCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
+            )
+
+        FieldUpdate (ProfilePictureUrl url) ->
+            ( Api.map (\m -> { m | profilePictureUrl = url }) model
+            , Effect.none
+            )
+
 
         FieldUpdate (Description description) ->
             ( Api.map (\m -> { m | description = String.left 250 description }) model
@@ -138,45 +163,47 @@ view model =
             Api.Success info ->
                 E.column [ E.padding 32, E.width (E.fill |> E.maximum (16 * 36)), E.height E.fill, E.centerX, E.spacing 16 ]
                     [ el [ Font.size 24, Font.bold ] (text "General")
-                    , Input.text inputBoxStyles
+                    , CInput.text []
                         { onChange = FieldUpdate << ClubName
                         , text = info.clubName
                         , placeholder = Nothing
-                        , label = label "DISPLAY NAME"
+                        , label = "DISPLAY NAME"
                         }
-                    , Input.text inputBoxStyles
+                    , E.row [ E.spacing 16 ]
+                        [ viewProfilePicture info.profilePictureUrl info.clubName
+                        , E.column [ E.width E.fill, E.spacing 16 ]
+                            [ E.paragraph [ Font.color mono_300 ] [ text "Upload a profile picture. Dimensions should be between 160x160 to 256x256." ]
+                            , CInput.button [] { onPress = Just ProfilePictureRequested, label = text "Upload Image" }
+                            ]
+                        ]
+                    , CInput.text []
                         { onChange = FieldUpdate << MeetTime
                         , text = info.meetTime
                         , placeholder = Nothing
-                        , label = label "MEET TIME"
+                        , label = "MEET TIME"
                         }
-                    , Input.multiline
-                        (characterLimit 250 info.description :: inputBoxStyles)
+                    , CInput.multiline
+                        [characterLimit 250 info.description]
                         { onChange = FieldUpdate << Description
                         , text = info.description
                         , placeholder = Nothing
-                        , label = label "DESCRIPTION"
+                        , label = "DESCRIPTION"
                         , spellcheck = True
                         }
-                    , Input.multiline
-                        (E.height (E.shrink |> E.minimum (16 * 16)) :: characterLimit 250 info.description :: inputBoxStyles)
+                    , CInput.multiline
+                        [E.height (E.shrink |> E.minimum (16 * 16))]
                         { onChange = FieldUpdate << About
                         , text = info.about
                         , placeholder = Nothing
-                        , label = label "ABOUT"
+                        , label = "ABOUT"
                         , spellcheck = True
                         }
                     , E.paragraph []
-                        [ E.link [ Font.underline, Font.color red_400 ] { url = "https://www.markdownguide.org/", label = text "Markdown" }
+                        [ E.link linkStyles { url = "https://www.markdownguide.org/", label = text "Markdown" }
                         , text " is accepted!"
                         ]
                     ]
     }
-
-
-label : String -> Input.Label msg
-label name =
-    Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text name)
 
 
 characterLimit : Int -> String -> E.Attribute msg
@@ -201,3 +228,17 @@ characterLimit limit current =
             ]
             (text (String.fromInt remainingCharacters))
         )
+
+
+viewProfilePicture : String -> String -> E.Element msg
+viewProfilePicture url clubName =
+    E.image
+        [ Border.rounded 160
+        , E.clip
+        , E.width (E.px 128)
+        , E.height (E.px 128)
+        , E.alignLeft
+        ]
+        { src = url
+        , description = clubName ++ "'s profile picture"
+        }

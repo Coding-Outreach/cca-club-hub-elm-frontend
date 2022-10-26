@@ -3,8 +3,8 @@ module Pages.Login exposing (Model, Msg, page)
 import Api
 import Color exposing (..)
 import Components.Icon exposing (icon)
-import Components.Input exposing (inputBoxStyles)
-import Dict
+import Components.Input as CInput
+import Components.Link exposing (linkStyles)
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
 import Element.Background as Bg
@@ -166,14 +166,14 @@ view model =
                 , Region.heading 1
                 ]
                 (E.text "Welcome Back!")
-            , Input.username inputBoxStyles
+            , CInput.username []
                 { onChange = FieldUpdate Username
                 , text = model.username
                 , placeholder = Nothing
-                , label = Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text "USERNAME")
+                , label = "USERNAME"
                 }
-            , Input.currentPassword
-                (E.inFront
+            , CInput.currentPassword
+                [E.inFront
                     (el
                         [ E.centerY
                         , E.alignRight
@@ -185,23 +185,16 @@ view model =
                         ]
                         (icon ("fa-regular " ++ eyeIcon))
                     )
-                    :: inputBoxStyles
-                )
+                    
+            ]
                 { onChange = FieldUpdate Password
                 , text = model.password
                 , placeholder = Nothing
-                , label = Input.labelAbove [ Font.bold, Font.color mono_400, Font.size 14 ] (text "PASSWORD")
+                , label = "PASSWORD"
                 , show = model.showPassword
                 }
-            , E.link [ Font.underline, Font.color red_400 ] { url = "/forgot-password", label = text "Forgot your password?" }
-            , Input.button
-                [ Bg.color red_500
-                , E.paddingXY 16 12
-                , Font.size 18
-                , Font.bold
-                , Border.rounded 4
-                ]
-                { onPress = Just Submit, label = text "Login" }
+            , E.link linkStyles { url = "/forgot-password", label = text "Forgot your password?" }
+            , CInput.button [] { onPress = Just Submit, label = text "Login" }
             , el [ Font.color red_300 ] (text model.badLogin)
             ]
     }
