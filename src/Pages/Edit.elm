@@ -2,8 +2,8 @@ module Pages.Edit exposing (Model, Msg, page)
 
 import Api
 import Color exposing (..)
-import Components.Link exposing (linkStyles)
 import Components.Input as CInput
+import Components.Link exposing (linkStyles)
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
 import Element.Background as Input
@@ -39,14 +39,7 @@ page shared route =
 -- INIT
 
 
-type alias Model =
-    Api.Status
-        { clubName : String
-        , profilePictureUrl : String
-        , description : String
-        , meetTime : String
-        , about : String
-        }
+type alias Model = Api.Status Api.ClubInfo
 
 
 init : Shared.Model -> () -> ( Model, Effect Msg )
@@ -74,7 +67,7 @@ type Field
 
 
 type Msg
-    = GotInitialData (Result Http.Error Api.ClubInfoResponse)
+    = GotInitialData (Result Http.Error Api.ClubInfo)
     | FieldUpdate Field
     | ProfilePictureRequested
     | ProfilePictureLoaded File
@@ -84,13 +77,7 @@ update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
         GotInitialData (Ok info) ->
-            ( Api.Success
-                { clubName = info.clubName
-                , profilePictureUrl = info.profilePictureUrl
-                , description = Maybe.withDefault "" info.description
-                , meetTime = info.meetTime
-                , about = info.about
-                }
+            ( Api.Success info
             , Effect.none
             )
 
@@ -103,10 +90,10 @@ update msg model =
             ( Api.map (\m -> { m | clubName = String.left 32 name }) model
             , Effect.none
             )
-        
+
         ProfilePictureRequested ->
             ( model
-            , Effect.fromCmd (Select.file ["image/png", "image/jpeg", "image/webp"] ProfilePictureLoaded)
+            , Effect.fromCmd (Select.file [ "image/png", "image/jpeg", "image/webp" ] ProfilePictureLoaded)
             )
 
         ProfilePictureLoaded file ->
@@ -118,7 +105,6 @@ update msg model =
             ( Api.map (\m -> { m | profilePictureUrl = url }) model
             , Effect.none
             )
-
 
         FieldUpdate (Description description) ->
             ( Api.map (\m -> { m | description = String.left 250 description }) model
@@ -183,7 +169,7 @@ view model =
                         , label = "MEET TIME"
                         }
                     , CInput.multiline
-                        [characterLimit 250 info.description]
+                        [ characterLimit 250 info.description ]
                         { onChange = FieldUpdate << Description
                         , text = info.description
                         , placeholder = Nothing
@@ -191,7 +177,7 @@ view model =
                         , spellcheck = True
                         }
                     , CInput.multiline
-                        [E.height (E.shrink |> E.minimum (16 * 16))]
+                        [ E.height (E.shrink |> E.minimum (16 * 16)) ]
                         { onChange = FieldUpdate << About
                         , text = info.about
                         , placeholder = Nothing

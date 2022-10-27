@@ -27,7 +27,7 @@ map fn status =
 
 backendUrl : String
 backendUrl =
-    "https://c6cf53f0-37e5-42b6-b89f-51d11e7d14fe.mock.pstmn.io/api"
+    "http://0.0.0.0:8080/api"
 
 
 type alias LoginResponse =
@@ -49,11 +49,11 @@ loginResponseDecoder =
     D.map LoginResponse (D.field "token" D.string)
 
 
-type alias ClubInfoResponse =
+type alias ClubInfo =
     { id : String
     , clubName : String
     , meetTime : String
-    , description : Maybe String
+    , description : String
     , about : String
     , profilePictureUrl : String
     , socials : Socials
@@ -70,7 +70,7 @@ type alias Socials =
     }
 
 
-getClubInfo : String -> (Result Http.Error ClubInfoResponse -> msg) -> Cmd msg
+getClubInfo : String -> (Result Http.Error ClubInfo -> msg) -> Cmd msg
 getClubInfo id msg =
     Http.get
         { url = backendUrl ++ "/club/info/" ++ id
@@ -78,14 +78,14 @@ getClubInfo id msg =
         }
 
 
-clubInfoResponseDecoder : D.Decoder ClubInfoResponse
+clubInfoResponseDecoder : D.Decoder ClubInfo
 clubInfoResponseDecoder =
     D.map8
-        ClubInfoResponse
+        ClubInfo
         (D.field "id" D.string)
         (D.field "clubName" D.string)
         (D.field "meetTime" D.string)
-        (D.field "description" (D.maybe D.string))
+        (D.field "description" D.string)
         (D.field "about" D.string)
         (D.field "profilePictureUrl" D.string)
         (D.field "socials" socialsDecoder)

@@ -42,7 +42,7 @@ page shared route =
 
 type alias Model =
     { clubId : String
-    , clubInfo : Api.Status Api.ClubInfoResponse
+    , clubInfo : Api.Status Api.ClubInfo
     }
 
 
@@ -60,7 +60,7 @@ init route () =
 
 
 type Msg
-    = GotResponse (Result Http.Error Api.ClubInfoResponse)
+    = GotResponse (Result Http.Error Api.ClubInfo)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -143,7 +143,7 @@ view model =
                                     , left = 0
                                     }
                                 ]
-                                (text (Maybe.withDefault "" info.description))
+                                (text info.description)
                             ]
 
                         -- Wrapping row for this as well?
