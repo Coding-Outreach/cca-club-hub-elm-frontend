@@ -29,7 +29,7 @@ page : Shared.Model -> Route () -> Page Model Msg
 page shared route =
     Page.new
         { init = init shared
-        , update = update
+        , update = update shared
         , subscriptions = subscriptions
         , view = view
         }
@@ -76,8 +76,8 @@ type Msg
     | GotResponse (Result Http.Error ())
 
 
-update : Msg -> Model -> ( Model, Effect Msg )
-update msg model =
+update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
+update shared msg model =
     case msg of
         GotInitialData (Ok info) ->
             ( Api.Success info
@@ -127,12 +127,18 @@ update msg model =
         Submit ->
             case model of
                 Api.Success info ->
-                    ( model
-                    , Effect.fromCmd (Api.doClubEdit info GotResponse) 
-                    )
+                    case shared.loginStatus of
+                        Shared.LoggedIn { token } ->
+                            ( model
+                            , Effect.fromCmd (Api.doClubEdit token info GotResponse)
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
+
         GotResponse _ ->
             ( model, Effect.none )
 

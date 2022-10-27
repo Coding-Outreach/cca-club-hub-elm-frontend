@@ -1,6 +1,7 @@
 module Api exposing (..)
 
 import Http
+import Jwt.Http
 import Json.Decode as D
 import Json.Encode as E
 
@@ -78,11 +79,11 @@ getClubInfo id msg =
         }
 
 
-doClubEdit : ClubInfo -> (Result Http.Error () -> msg) -> Cmd msg
-doClubEdit info msg =
-    Http.post
+doClubEdit : String -> ClubInfo -> (Result Http.Error () -> msg) -> Cmd msg
+doClubEdit token info msg =
+    Jwt.Http.post token
         { body = Http.jsonBody (clubInfoEditEncoder info)
-        , url = backendUrl ++ "/edit"
+        , url = backendUrl ++ "/edit/" ++ info.id
         , expect = Http.expectWhatever msg
         }
 
