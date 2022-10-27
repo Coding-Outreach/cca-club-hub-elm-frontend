@@ -39,7 +39,8 @@ page shared route =
 -- INIT
 
 
-type alias Model = Api.Status Api.ClubInfo
+type alias Model =
+    Api.Status Api.ClubInfo
 
 
 init : Shared.Model -> () -> ( Model, Effect Msg )
@@ -71,6 +72,8 @@ type Msg
     | FieldUpdate Field
     | ProfilePictureRequested
     | ProfilePictureLoaded File
+    | Submit
+    | GotResponse (Result Http.Error ())
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -120,6 +123,18 @@ update msg model =
             ( Api.map (\m -> { m | about = about }) model
             , Effect.none
             )
+
+        Submit ->
+            case model of
+                Api.Success info ->
+                    ( model
+                    , Effect.fromCmd (Api.doClubEdit info GotResponse) 
+                    )
+
+                _ ->
+                    ( model, Effect.none )
+        GotResponse _ ->
+            ( model, Effect.none )
 
 
 
@@ -188,6 +203,7 @@ view model =
                         [ E.link linkStyles { url = "https://www.markdownguide.org/", label = text "Markdown" }
                         , text " is accepted!"
                         ]
+                    , CInput.button [] { onPress = Just Submit, label = text "Submit Changes" }
                     ]
     }
 

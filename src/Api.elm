@@ -27,7 +27,7 @@ map fn status =
 
 backendUrl : String
 backendUrl =
-    "http://0.0.0.0:8080/api"
+    "http://localhost:8080/api"
 
 
 type alias LoginResponse =
@@ -74,12 +74,46 @@ getClubInfo : String -> (Result Http.Error ClubInfo -> msg) -> Cmd msg
 getClubInfo id msg =
     Http.get
         { url = backendUrl ++ "/club/info/" ++ id
-        , expect = Http.expectJson msg clubInfoResponseDecoder
+        , expect = Http.expectJson msg clubInfoDecoder
         }
 
 
-clubInfoResponseDecoder : D.Decoder ClubInfo
-clubInfoResponseDecoder =
+doClubEdit : ClubInfo -> (Result Http.Error () -> msg) -> Cmd msg
+doClubEdit info msg =
+    Http.post
+        { body = Http.jsonBody (clubInfoEditEncoder info)
+        , url = backendUrl ++ "/edit"
+        , expect = Http.expectWhatever msg
+        }
+
+
+maybe : (a -> E.Value) -> Maybe a -> E.Value
+maybe encoder =
+    Maybe.map encoder >> Maybe.withDefault E.null
+
+
+clubInfoEditEncoder : ClubInfo -> E.Value
+clubInfoEditEncoder info =
+    E.object
+        [ ( "clubName", E.string info.clubName )
+        , ( "meetTime", E.string info.meetTime )
+        , ( "description", E.string info.description )
+        , ( "about", E.string info.about )
+        , ( "profilePictureUrl", E.string info.profilePictureUrl )
+        , ( "categories", E.list E.string info.categories )
+        , ( "socials"
+          , E.object
+                [ ( "website", maybe E.string info.socials.website )
+                , ( "googleClassroom", maybe E.string info.socials.googleClassroom )
+                , ( "discord", maybe E.string info.socials.discord )
+                , ( "instagram", maybe E.string info.socials.instagram )
+                ]
+          )
+        ]
+
+
+clubInfoDecoder : D.Decoder ClubInfo
+clubInfoDecoder =
     D.map8
         ClubInfo
         (D.field "id" D.string)
