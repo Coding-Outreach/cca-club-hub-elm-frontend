@@ -9,8 +9,8 @@ import Element as E exposing (Element, el, text)
 import Element.Background as Bg
 import Element.Border as Border
 import Element.Font as Font
-import Element.Region as Region
 import Element.Input as Input
+import Element.Region as Region
 import Fuzzy
 import Http
 import Layout exposing (Layout)

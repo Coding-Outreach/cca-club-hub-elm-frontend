@@ -52,6 +52,10 @@ type LoginStatus
     | LoggedIn { token : String, clubId : String }
 
 
+
+-- check if token is expired or not.
+
+
 init : Result D.Error Flags -> Route () -> ( Model, Effect Msg )
 init flagsResult route =
     let

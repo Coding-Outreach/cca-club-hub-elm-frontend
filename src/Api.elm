@@ -1,9 +1,9 @@
 module Api exposing (..)
 
 import Http
-import Jwt.Http
 import Json.Decode as D
 import Json.Encode as E
+import Jwt.Http
 
 
 type Status value

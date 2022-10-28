@@ -29,7 +29,7 @@ page : Shared.Model -> Route () -> Page Model Msg
 page shared route =
     Page.new
         { init = init shared
-        , update = update shared
+        , update = update
         , subscriptions = subscriptions
         , view = view
         }
@@ -40,19 +40,24 @@ page shared route =
 
 
 type alias Model =
-    Api.Status Api.ClubInfo
+    { info : Api.Status Api.ClubInfo
+    , token : String
+    , editStatus : Maybe (Api.Status ())
+    }
 
 
 init : Shared.Model -> () -> ( Model, Effect Msg )
 init shared () =
-    ( Api.Loading
-    , case shared.loginStatus of
+    case shared.loginStatus of
         Shared.NotLoggedIn ->
-            Effect.pushUrlPath "/"
+            ( { info = Api.Loading, token = "", editStatus = Nothing }
+            , Effect.pushUrlPath "/"
+            )
 
-        Shared.LoggedIn { clubId } ->
-            Effect.fromCmd (Api.getClubInfo clubId GotInitialData)
-    )
+        Shared.LoggedIn { clubId, token } ->
+            ( { info = Api.Loading, token = token, editStatus = Nothing }
+            , Effect.fromCmd (Api.getClubInfo clubId GotInitialData)
+            )
 
 
 
@@ -76,21 +81,42 @@ type Msg
     | GotResponse (Result Http.Error ())
 
 
-update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
-update shared msg model =
+update : Msg -> Model -> ( Model, Effect Msg )
+update msg model =
     case msg of
         GotInitialData (Ok info) ->
-            ( Api.Success info
+            ( { model | info = Api.Success info }
             , Effect.none
             )
 
         GotInitialData (Err err) ->
-            ( Api.Failure err
+            ( { model | info = Api.Failure err }
             , Effect.none
             )
 
-        FieldUpdate (ClubName name) ->
-            ( Api.map (\m -> { m | clubName = String.left 32 name }) model
+        FieldUpdate field ->
+            let
+                info =
+                    model.info
+
+                newInfo =
+                    case field of
+                        ClubName name ->
+                            Api.map (\m -> { m | clubName = String.left 32 name }) info
+
+                        ProfilePictureUrl url ->
+                            Api.map (\m -> { m | profilePictureUrl = url }) info
+
+                        Description description ->
+                            Api.map (\m -> { m | description = String.left 250 description }) info
+
+                        MeetTime meetTime ->
+                            Api.map (\m -> { m | meetTime = String.left 60 meetTime }) info
+
+                        About about ->
+                            Api.map (\m -> { m | about = about }) info
+            in
+            ( { model | info = newInfo }
             , Effect.none
             )
 
@@ -104,43 +130,21 @@ update shared msg model =
             , Effect.fromCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
             )
 
-        FieldUpdate (ProfilePictureUrl url) ->
-            ( Api.map (\m -> { m | profilePictureUrl = url }) model
-            , Effect.none
-            )
-
-        FieldUpdate (Description description) ->
-            ( Api.map (\m -> { m | description = String.left 250 description }) model
-            , Effect.none
-            )
-
-        FieldUpdate (MeetTime meetTime) ->
-            ( Api.map (\m -> { m | meetTime = String.left 60 meetTime }) model
-            , Effect.none
-            )
-
-        FieldUpdate (About about) ->
-            ( Api.map (\m -> { m | about = about }) model
-            , Effect.none
-            )
-
         Submit ->
-            case model of
+            case model.info of
                 Api.Success info ->
-                    case shared.loginStatus of
-                        Shared.LoggedIn { token } ->
-                            ( model
-                            , Effect.fromCmd (Api.doClubEdit token info GotResponse)
-                            )
-
-                        _ ->
-                            ( model, Effect.none )
+                    ( { model | editStatus = Just Api.Loading }
+                    , Effect.fromCmd (Api.doClubEdit model.token info GotResponse)
+                    )
 
                 _ ->
                     ( model, Effect.none )
 
-        GotResponse _ ->
-            ( model, Effect.none )
+        GotResponse (Ok _) ->
+            ( { model | editStatus = Just (Api.Success ()) }, Effect.none )
+
+        GotResponse (Err err) ->
+            ( { model | editStatus = Just (Api.Failure err) }, Effect.none )
 
 
 
@@ -160,7 +164,7 @@ view : Model -> View Msg
 view model =
     { title = "Login"
     , body =
-        case model of
+        case model.info of
             Api.Loading ->
                 el [ E.centerX, E.centerY ] (text "Loading...")
 
@@ -210,6 +214,7 @@ view model =
                         , text " is accepted!"
                         ]
                     , CInput.button [] { onPress = Just Submit, label = text "Submit Changes" }
+                    , Maybe.withDefault (text "") (viewStatusMessage model.editStatus)
                     ]
     }
 
@@ -250,3 +255,38 @@ viewProfilePicture url clubName =
         { src = url
         , description = clubName ++ "'s profile picture"
         }
+
+
+viewStatusMessage : Maybe (Api.Status ()) -> Maybe (E.Element msg)
+viewStatusMessage =
+    Maybe.map
+        (\status ->
+            let
+                color =
+                    case status of
+                        Api.Loading ->
+                            white
+
+                        Api.Success _ ->
+                            E.rgb255 0 255 0
+
+                        -- TODO create pallete for greens as well
+                        Api.Failure _ ->
+                            red_300
+
+                message =
+                    case status of
+                        Api.Loading ->
+                            "Loading..."
+
+                        Api.Success _ ->
+                            "Club successfully updated!"
+
+                        Api.Failure (Http.BadStatus 400) ->
+                            "You are unauthorized! try relogging in"
+
+                        Api.Failure err ->
+                            "Something went wrong: " ++ Debug.toString err
+            in
+            el [ Font.color color ] (text message)
+        )

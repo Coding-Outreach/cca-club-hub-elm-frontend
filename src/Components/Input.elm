@@ -1,4 +1,4 @@
-module Components.Input exposing (label, button, text, multiline, username, currentPassword, inputBoxStyles)
+module Components.Input exposing (button, currentPassword, inputBoxStyles, label, multiline, text, username)
 
 import Color exposing (..)
 import Element as E
@@ -7,19 +7,26 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 
+
+
 -- This is a wrapper for elm-ui.Input since we want some default styles
 
+
 button : List (E.Attribute msg) -> { onPress : Maybe msg, label : E.Element msg } -> E.Element msg
-button attrs options = Input.button
-                ([ Bg.color red_500
-                , E.paddingXY 16 12
-                , Font.size 18
-                , Font.bold
-                , Border.rounded 4
-                , E.focused [ Bg.color red_600 ]
-                , E.mouseOver [ Bg.color red_600 ]
-                ] ++ attrs)
-                options 
+button attrs options =
+    Input.button
+        ([ Bg.color red_500
+         , E.paddingXY 16 12
+         , Font.size 18
+         , Font.bold
+         , Border.rounded 4
+         , E.focused [ Bg.color red_600 ]
+         , E.mouseOver [ Bg.color red_600 ]
+         ]
+            ++ attrs
+        )
+        options
+
 
 text :
     List (E.Attribute msg)
@@ -58,6 +65,7 @@ multiline attrs options =
         , spellcheck = options.spellcheck
         }
 
+
 username :
     List (E.Attribute msg)
     ->
@@ -74,6 +82,7 @@ username attr options =
         , placeholder = options.placeholder
         , label = label options.label
         }
+
 
 currentPassword :
     List (E.Attribute msg)

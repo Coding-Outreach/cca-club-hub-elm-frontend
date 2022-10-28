@@ -173,7 +173,7 @@ view model =
                 , label = "USERNAME"
                 }
             , CInput.currentPassword
-                [E.inFront
+                [ E.inFront
                     (el
                         [ E.centerY
                         , E.alignRight
@@ -185,8 +185,7 @@ view model =
                         ]
                         (icon ("fa-regular " ++ eyeIcon))
                     )
-                    
-            ]
+                ]
                 { onChange = FieldUpdate Password
                 , text = model.password
                 , placeholder = Nothing
