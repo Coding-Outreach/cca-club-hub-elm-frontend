@@ -64,12 +64,20 @@ init shared () =
 -- UPDATE
 
 
+type Social
+    = Website String
+    | GoogleClassroom String
+    | Discord String
+    | Instagram String
+
+
 type Field
     = ClubName String
     | ProfilePictureUrl String
     | MeetTime String
     | Description String
     | About String
+    | Social Social
 
 
 type Msg
@@ -94,6 +102,37 @@ update msg model =
             , Effect.none
             )
 
+        FieldUpdate (Social social) ->
+            case model.info of
+                Api.Success info ->
+                    let
+                        socials =
+                            info.socials
+
+                        newSocials =
+                            case social of
+                                Website website ->
+                                    { socials | website = Just website }
+
+                                GoogleClassroom gc ->
+                                    { socials | googleClassroom = Just gc }
+
+                                Discord dc ->
+                                    { socials | discord = Just dc }
+
+                                Instagram ig ->
+                                    { socials | instagram = Just ig }
+
+                        newInfo =
+                            { info | socials = newSocials }
+                    in
+                    ( { model | info = Api.Success newInfo }
+                    , Effect.none
+                    )
+
+                _ ->
+                    ( model, Effect.none )
+
         FieldUpdate field ->
             let
                 info =
@@ -115,6 +154,9 @@ update msg model =
 
                         About about ->
                             Api.map (\m -> { m | about = about }) info
+
+                        _ ->
+                            info
             in
             ( { model | info = newInfo }
             , Effect.none
@@ -213,6 +255,31 @@ view model =
                         [ E.link linkStyles { url = "https://www.markdownguide.org/", label = text "Markdown" }
                         , text " is accepted!"
                         ]
+                    , el [ Font.size 24, Font.bold ] (text "Socials")
+                    , CInput.text []
+                        { onChange = FieldUpdate << Social << Website
+                        , text = Maybe.withDefault "" info.socials.website
+                        , placeholder = Nothing
+                        , label = "WEBSITE"
+                        }
+                    , CInput.text []
+                        { onChange = FieldUpdate << Social << GoogleClassroom
+                        , text = Maybe.withDefault "" info.socials.googleClassroom
+                        , placeholder = Nothing
+                        , label = "GOOGLE CLASSROOM (put invite code)"
+                        }
+                    , CInput.text []
+                        { onChange = FieldUpdate << Social << Discord
+                        , text = Maybe.withDefault "" info.socials.discord
+                        , placeholder = Nothing
+                        , label = "DISCORD"
+                        }
+                    , CInput.text []
+                        { onChange = FieldUpdate << Social << Instagram
+                        , text = Maybe.withDefault "" info.socials.instagram
+                        , placeholder = Nothing
+                        , label = "INSTAGRAM"
+                        }
                     , CInput.button [] { onPress = Just Submit, label = text "Submit Changes" }
                     , Maybe.withDefault (text "") (viewStatusMessage model.editStatus)
                     ]

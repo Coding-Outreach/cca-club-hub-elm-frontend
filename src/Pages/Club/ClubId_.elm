@@ -178,6 +178,7 @@ view model =
     }
 
 
+-- TODO add a border with a container
 viewProfilePicture : String -> String -> Element msg
 viewProfilePicture url clubName =
     E.image
@@ -189,8 +190,7 @@ viewProfilePicture url clubName =
         , E.alignLeft
         , E.moveDown 64
         , E.moveRight 32
-        , Border.width 8
-        , Border.color mono_600
+        , Bg.color mono_600
         ]
         { src = url
         , description = clubName ++ "'s profile picture"
