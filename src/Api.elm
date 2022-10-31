@@ -93,6 +93,18 @@ maybe encoder =
     Maybe.map encoder >> Maybe.withDefault E.null
 
 
+toMaybe : Maybe String -> Maybe String
+toMaybe =
+    Maybe.andThen
+        (\str ->
+            if String.isEmpty str then
+                Nothing
+
+            else
+                Just str
+        )
+
+
 clubInfoEditEncoder : ClubInfo -> E.Value
 clubInfoEditEncoder info =
     E.object
@@ -104,10 +116,10 @@ clubInfoEditEncoder info =
         , ( "categories", E.list E.string info.categories )
         , ( "socials"
           , E.object
-                [ ( "website", maybe E.string info.socials.website )
-                , ( "googleClassroom", maybe E.string info.socials.googleClassroom )
-                , ( "discord", maybe E.string info.socials.discord )
-                , ( "instagram", maybe E.string info.socials.instagram )
+                [ ( "website", maybe E.string (toMaybe info.socials.website) )
+                , ( "googleClassroom", maybe E.string (toMaybe info.socials.googleClassroom) )
+                , ( "discord", maybe E.string (toMaybe info.socials.discord) )
+                , ( "instagram", maybe E.string (toMaybe info.socials.instagram) )
                 ]
           )
         ]

@@ -42,6 +42,7 @@ page shared route =
 type alias Model =
     { info : Api.Status Api.ClubInfo
     , token : String
+    , pfpTooBig : Bool
     , editStatus : Maybe (Api.Status ())
     }
 
@@ -50,12 +51,12 @@ init : Shared.Model -> () -> ( Model, Effect Msg )
 init shared () =
     case shared.loginStatus of
         Shared.NotLoggedIn ->
-            ( { info = Api.Loading, token = "", editStatus = Nothing }
+            ( { info = Api.Loading, token = "", editStatus = Nothing, pfpTooBig = False }
             , Effect.pushUrlPath "/"
             )
 
         Shared.LoggedIn { clubId, token } ->
-            ( { info = Api.Loading, token = token, editStatus = Nothing }
+            ( { info = Api.Loading, token = token, editStatus = Nothing, pfpTooBig = False }
             , Effect.fromCmd (Api.getClubInfo clubId GotInitialData)
             )
 
@@ -133,6 +134,29 @@ update msg model =
                 _ ->
                     ( model, Effect.none )
 
+        FieldUpdate (ProfilePictureUrl url) ->
+            let
+                size =
+                    String.length url
+            in
+            if size > 64000 then
+                ( { model | pfpTooBig = True }, Effect.none )
+
+            else
+                ( { model | pfpTooBig = False, info = Api.map (\m -> { m | profilePictureUrl = url }) model.info }
+                , Effect.none
+                )
+
+        ProfilePictureRequested ->
+            ( model
+            , Effect.fromCmd (Select.file [ "image/png", "image/jpeg", "image/webp" ] ProfilePictureLoaded)
+            )
+
+        ProfilePictureLoaded file ->
+            ( model
+            , Effect.fromCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
+            )
+
         FieldUpdate field ->
             let
                 info =
@@ -142,9 +166,6 @@ update msg model =
                     case field of
                         ClubName name ->
                             Api.map (\m -> { m | clubName = String.left 32 name }) info
-
-                        ProfilePictureUrl url ->
-                            Api.map (\m -> { m | profilePictureUrl = url }) info
 
                         Description description ->
                             Api.map (\m -> { m | description = String.left 250 description }) info
@@ -160,16 +181,6 @@ update msg model =
             in
             ( { model | info = newInfo }
             , Effect.none
-            )
-
-        ProfilePictureRequested ->
-            ( model
-            , Effect.fromCmd (Select.file [ "image/png", "image/jpeg", "image/webp" ] ProfilePictureLoaded)
-            )
-
-        ProfilePictureLoaded file ->
-            ( model
-            , Effect.fromCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
             )
 
         Submit ->
@@ -225,8 +236,17 @@ view model =
                     , E.row [ E.spacing 16 ]
                         [ viewProfilePicture info.profilePictureUrl info.clubName
                         , E.column [ E.width E.fill, E.spacing 16 ]
-                            [ E.paragraph [ Font.color mono_300 ] [ text "Upload a profile picture. Dimensions should be between 160x160 to 256x256." ]
+                            [ E.paragraph [ Font.color mono_300 ]
+                                [ text "Upload a profile picture. Dimensions should be between 160x160 to 256x256."
+                                ]
                             , CInput.button [] { onPress = Just ProfilePictureRequested, label = text "Upload Image" }
+                            , if model.pfpTooBig then
+                                E.paragraph [ Font.color red_300 ]
+                                    [ text ("Your profile picture is too big.")
+                                    ]
+
+                              else
+                                text ""
                             ]
                         ]
                     , CInput.text []
