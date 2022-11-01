@@ -121,7 +121,7 @@ view model =
             Api.Success info ->
                 E.column [ E.padding 32, E.width E.fill, E.height E.fill ]
                     [ el [ E.width E.fill, E.height (E.px 128), Bg.color red_100, E.padding 16 ] (text "")
-                    , E.row
+                    , E.column
                         [ E.width E.fill
                         , Bg.color mono_600
                         , E.paddingEach
@@ -135,22 +135,16 @@ view model =
                         [ E.column [ E.spacing 12 ]
                             [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text info.clubName)
                             , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ info.meetTime)) ]
-                            , el
-                                [ E.paddingEach
-                                    { top = 16
-                                    , right = 0
-                                    , bottom = 0
-                                    , left = 0
-                                    }
-                                ]
-                                (text info.description)
                             ]
-
-                        -- Wrapping row for this as well?
-                        , E.row [ E.alignRight, E.alignTop, E.spacing 8 ]
-                            [ E.column [ E.spacing 8, E.alignTop ] []
-                            , E.column [ E.spacing 8, E.alignTop ] []
+                        , E.paragraph
+                            [ E.paddingEach
+                                { top = 16
+                                , right = 0
+                                , bottom = 0
+                                , left = 0
+                                }
                             ]
+                            [ text info.description ]
                         ]
                     , E.row [ E.padding 32, E.width E.fill ]
                         [ E.column
@@ -178,7 +172,10 @@ view model =
     }
 
 
+
 -- TODO add a border with a container
+
+
 viewProfilePicture : String -> String -> Element msg
 viewProfilePicture url clubName =
     E.image
