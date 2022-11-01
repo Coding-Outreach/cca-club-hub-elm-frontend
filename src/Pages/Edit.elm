@@ -9,6 +9,7 @@ import Element as E exposing (el, text)
 import Element.Background as Bg
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import File exposing (File)
 import File.Select as Select
 import Html
@@ -107,6 +108,7 @@ type Msg
     | Submit
     | GotSubmit (Result Http.Error ())
     | AddCategory
+    | DeleteCategory String
 
 
 
@@ -190,6 +192,18 @@ update msg model =
                                     model.categoryField
                     in
                     ( { model | info = Api.Success newInfo, categoryField = newCategoryField }, Effect.none )
+
+                _ ->
+                    ( model, Effect.none )
+
+        DeleteCategory category ->
+            case model.info of
+                Api.Success info ->
+                    let
+                        newInfo =
+                            { info | categories = List.filter ((/=) category) info.categories }
+                    in
+                    ( { model | info = Api.Success newInfo }, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -379,8 +393,9 @@ view model =
 
 viewCategory : String -> E.Element Msg
 viewCategory category =
-    E.link
+    E.row
         [ E.paddingXY 12 6
+        , E.spacing 8
         , Border.rounded 16
         , Bg.color red_100
         , Font.color red_700
@@ -388,7 +403,7 @@ viewCategory category =
         , Font.size 12
         , E.mouseOver [ Bg.color red_200 ]
         ]
-        { url = "/tag/" ++ category, label = text (String.toUpper category) }
+        [ text (String.toUpper category), Input.button [] { onPress = Just (DeleteCategory category), label = text "X" } ]
 
 
 validCategory : Api.Status (List String) -> String -> Maybe String
