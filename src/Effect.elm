@@ -5,7 +5,7 @@ port module Effect exposing
     , pushUrlPath
     , save
     , toCmd
-    , promptToSave
+    , warnUnsavedChanges
     )
 
 {-|
@@ -185,4 +185,4 @@ toCmd options effect =
 -- PROMPT TO SAVE
 
 
-port promptToSave : Bool -> Cmd msg
+port warnUnsavedChanges : Bool -> Cmd msg
