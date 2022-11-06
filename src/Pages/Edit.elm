@@ -173,7 +173,7 @@ update msg model =
                 Api.Success info ->
                     let
                         valid =
-                            validCategory model.categories model.categoryField
+                            validCategory model.categories info.categories model.categoryField
 
                         newInfo =
                             case valid of
@@ -386,7 +386,7 @@ view model =
                     , E.wrappedRow [ E.spacing 8 ] (List.map viewCategory info.categories)
                     , CInput.button [] { onPress = Just Submit, label = text "Submit Changes" }
                     , Maybe.withDefault (text "") (viewStatusMessage model.editStatus)
-                    , categoriesDatalist (Api.withDefault [] model.categories)
+                    , categoriesDatalist model.categories info.categories
                     ]
     }
 
@@ -406,22 +406,30 @@ viewCategory category =
         [ text (String.toUpper category), Input.button [] { onPress = Just (DeleteCategory category), label = text "X" } ]
 
 
-validCategory : Api.Status (List String) -> String -> Maybe String
-validCategory list value =
+validCategory : Api.Status (List String) -> List String -> String -> Maybe String
+validCategory list current value =
     list
         |> Api.withDefault []
+        |> List.filter (\v -> List.member v current |> not)
         |> List.filter (\v -> String.toLower v == String.toLower value)
         |> List.head
 
 
-categoriesDatalist : List String -> E.Element msg
-categoriesDatalist all =
-    let
-        stringToOption : String -> Html.Html msg
-        stringToOption c =
-            Html.option [ Attr.value c ] []
-    in
-    E.html (Html.datalist [ Attr.id "categories" ] (List.map stringToOption all))
+categoriesDatalist : Api.Status (List String) -> List String -> E.Element msg
+categoriesDatalist list current =
+    list
+        |> Api.withDefault []
+        -- Filter for tags that haven't been used yet
+        |> List.filter (\v -> List.member v current |> not)
+        -- Create Option elements
+        |> List.map (\v -> Html.option [ Attr.value v ] [])
+        -- Create Datalist element
+        |> Html.datalist [ Attr.id "categories" ]
+        |> E.html
+
+
+
+-- Turn into elm-ui elements
 
 
 characterLimit : Int -> String -> E.Attribute msg
