@@ -425,11 +425,8 @@ categoriesDatalist list current =
         |> List.map (\v -> Html.option [ Attr.value v ] [])
         -- Create Datalist element
         |> Html.datalist [ Attr.id "categories" ]
+        -- Turn into elm-ui elements
         |> E.html
-
-
-
--- Turn into elm-ui elements
 
 
 characterLimit : Int -> String -> E.Attribute msg
