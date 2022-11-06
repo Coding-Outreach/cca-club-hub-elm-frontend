@@ -159,7 +159,7 @@ update msg model =
                             { info | socials = newSocials }
                     in
                     ( { model | info = Api.Success newInfo }
-                    , Effect.none
+                    , Effect.fromCmd (Effect.warnUnsavedChanges True)
                     )
 
                 _ ->
@@ -218,7 +218,7 @@ update msg model =
 
             else
                 ( { model | pfpTooBig = False, info = Api.map (\m -> { m | profilePictureUrl = url }) model.info }
-                , Effect.none
+                , Effect.fromCmd (Effect.warnUnsavedChanges True)
                 )
 
         ProfilePictureRequested ->
@@ -253,7 +253,7 @@ update msg model =
                                     info
                     in
                     ( { model | info = Api.Success newInfo }
-                    , Effect.none
+                    , Effect.fromCmd (Effect.warnUnsavedChanges True)
                     )
 
                 _ ->
@@ -270,7 +270,7 @@ update msg model =
                     ( model, Effect.none )
 
         GotSubmit (Ok _) ->
-            ( { model | editStatus = Just (Api.Success ()) }, Effect.none )
+            ( { model | editStatus = Just (Api.Success ()) }, Effect.fromCmd (Effect.warnUnsavedChanges False) )
 
         GotSubmit (Err err) ->
             ( { model | editStatus = Just (Api.Failure err) }, Effect.none )
