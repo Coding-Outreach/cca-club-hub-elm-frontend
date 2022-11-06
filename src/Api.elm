@@ -26,6 +26,16 @@ map fn status =
             Failure err
 
 
+withDefault : a -> Status a -> a
+withDefault default status =
+    case status of
+        Success value ->
+            value
+
+        _ ->
+            default
+
+
 backendUrl : String
 backendUrl =
     "http://localhost:8080/api"
@@ -93,8 +103,8 @@ maybe encoder =
     Maybe.map encoder >> Maybe.withDefault E.null
 
 
-toMaybe : Maybe String -> Maybe String
-toMaybe =
+nullify : Maybe String -> Maybe String
+nullify =
     Maybe.andThen
         (\str ->
             if String.isEmpty str then
@@ -116,10 +126,10 @@ clubInfoEditEncoder info =
         , ( "categories", E.list E.string info.categories )
         , ( "socials"
           , E.object
-                [ ( "website", maybe E.string (toMaybe info.socials.website) )
-                , ( "googleClassroom", maybe E.string (toMaybe info.socials.googleClassroom) )
-                , ( "discord", maybe E.string (toMaybe info.socials.discord) )
-                , ( "instagram", maybe E.string (toMaybe info.socials.instagram) )
+                [ ( "website", maybe E.string (nullify info.socials.website) )
+                , ( "googleClassroom", maybe E.string (nullify info.socials.googleClassroom) )
+                , ( "discord", maybe E.string (nullify info.socials.discord) )
+                , ( "instagram", maybe E.string (nullify info.socials.instagram) )
                 ]
           )
         ]
@@ -182,3 +192,11 @@ clubListResponseDecoder =
             (D.field "profilePictureUrl" D.string)
             (D.field "categories" (D.list D.string))
         )
+
+
+getCategories : (Result Http.Error (List String) -> msg) -> Cmd msg
+getCategories msg =
+    Http.get
+        { url = backendUrl ++ "/club/categories/list"
+        , expect = Http.expectJson msg (D.list D.string)
+        }

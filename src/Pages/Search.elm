@@ -176,7 +176,7 @@ viewClubListing listing =
                 , E.column [ E.spacing 12 ]
                     [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text listing.clubName)
                     , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ listing.meetTime)) ]
-                    , el
+                    , E.paragraph
                         [ E.paddingEach
                             { top = 8
                             , right = 0
@@ -184,7 +184,7 @@ viewClubListing listing =
                             , left = 0
                             }
                         ]
-                        (text (Maybe.withDefault "" listing.description))
+                        [ text (Maybe.withDefault "" listing.description) ]
                     ]
                 ]
         }
