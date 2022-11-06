@@ -263,7 +263,7 @@ update msg model =
             case model.info of
                 Api.Success info ->
                     ( { model | editStatus = Just Api.Loading }
-                    , Effect.batch (List.map Effect.fromCmd [ Effect.warnUnsavedChanges False, Api.doClubEdit model.token info GotSubmit ])
+                    , Effect.fromCmd (Api.doClubEdit model.token info GotSubmit)
                     )
 
                 _ ->
