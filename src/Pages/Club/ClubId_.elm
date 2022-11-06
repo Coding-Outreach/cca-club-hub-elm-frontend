@@ -178,7 +178,10 @@ view model =
     }
 
 
+
 -- TODO add a border with a container
+
+
 viewProfilePicture : String -> String -> Element msg
 viewProfilePicture url clubName =
     E.image

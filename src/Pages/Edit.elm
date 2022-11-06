@@ -128,7 +128,7 @@ update msg model =
                             { info | socials = newSocials }
                     in
                     ( { model | info = Api.Success newInfo }
-                    , Effect.none
+                    , Effect.fromCmd (Effect.promptToSave True)
                     )
 
                 _ ->
@@ -144,7 +144,7 @@ update msg model =
 
             else
                 ( { model | pfpTooBig = False, info = Api.map (\m -> { m | profilePictureUrl = url }) model.info }
-                , Effect.none
+                , Effect.fromCmd (Effect.promptToSave True)
                 )
 
         ProfilePictureRequested ->
@@ -180,18 +180,18 @@ update msg model =
                             info
             in
             ( { model | info = newInfo }
-            , Effect.none
+            , Effect.fromCmd (Effect.promptToSave True)
             )
 
         Submit ->
             case model.info of
                 Api.Success info ->
                     ( { model | editStatus = Just Api.Loading }
-                    , Effect.fromCmd (Api.doClubEdit model.token info GotResponse)
+                    , Effect.batch (List.map Effect.fromCmd [ Effect.promptToSave False, Api.doClubEdit model.token info GotResponse ])
                     )
 
                 _ ->
-                    ( model, Effect.none )
+                    ( model, Effect.fromCmd (Effect.promptToSave False) )
 
         GotResponse (Ok _) ->
             ( { model | editStatus = Just (Api.Success ()) }, Effect.none )
@@ -242,7 +242,7 @@ view model =
                             , CInput.button [] { onPress = Just ProfilePictureRequested, label = text "Upload Image" }
                             , if model.pfpTooBig then
                                 E.paragraph [ Font.color red_300 ]
-                                    [ text ("Your profile picture is too big.")
+                                    [ text "Your profile picture is too big."
                                     ]
 
                               else
