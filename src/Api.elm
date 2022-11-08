@@ -220,3 +220,11 @@ getCategories msg =
         { url = backendUrl ++ "/club/categories/list"
         , expect = Http.expectJson msg (D.list D.string)
         }
+
+
+checkResetUrl : String -> (Result Http.Error () -> msg) -> Cmd msg
+checkResetUrl uid msg =
+    Http.get
+        { url = backendUrl ++ "/password/" ++ uid
+        , expect = Http.expectWhatever msg
+        }
