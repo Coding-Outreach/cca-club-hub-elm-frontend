@@ -125,7 +125,7 @@ view model =
                         [ E.width E.fill
                         , Bg.color mono_600
                         , E.paddingEach
-                            { top = 72
+                            { top = 80
                             , right = 32
                             , bottom = 32
                             , left = 32

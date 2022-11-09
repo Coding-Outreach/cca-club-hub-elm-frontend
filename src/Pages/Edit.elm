@@ -392,7 +392,7 @@ view model =
                         , placeholder = Nothing
                         , label = "INSTAGRAM"
                         }
-                    , el [ Font.size 24, Font.bold ] (text "Categories")
+                    , el [ Font.size 24, Font.bold ] (text "Tags")
                     , E.paragraph [ Font.color mono_300 ] [ text "Press enter to add a tag. Click one of the categories to remove them." ]
                     , CInput.text
                         [ E.htmlAttribute (Attr.list "categories")
