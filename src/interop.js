@@ -1,6 +1,6 @@
 export const flags = ({ env }) => {
   return {
-    token: JSON.parse(localStorage.token || null)
+    token: JSON.parse(localStorage.token || null),
   };
 };
 
@@ -13,13 +13,11 @@ export const onReady = ({ app, env }) => {
       });
     }
 
-    if (app.ports.promptToSave) {
-      app.ports.promptToSave.subscribe(b => {
-        if (b) {
-          addEventListener("beforeunload", listener, {capture: true});
-        } else {
-          removeEventListener("beforeunload", listener, {capture: true});
-        }
+    if (app.ports.updateWarnUnsavedChanges) {
+      app.ports.updateWarnUnsavedChanges.subscribe((on) => {
+        on
+          ? addEventListener("beforeunload", listener, { capture: true })
+          : removeEventListener("beforeunload", listener, { capture: true });
       });
     }
   }
@@ -27,5 +25,6 @@ export const onReady = ({ app, env }) => {
 
 const listener = (e) => {
   e.preventDefault();
-  return event.returnValue = "Are you sure you want to exit? You still have unsaved changes.";
+  return (event.returnValue =
+    "Are you sure you want to exit? You still have unsaved changes.");
 };

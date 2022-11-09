@@ -42,6 +42,7 @@ type Effect msg
     | ReplaceUrl String
     | LoadExternalUrl String
     | SaveToLocalStorage { key : String, value : Json.Encode.Value }
+    | WarnUnsavedChanges Bool
 
 
 none : Effect msg
@@ -141,6 +142,9 @@ map fn effect =
         SaveToLocalStorage options ->
             SaveToLocalStorage options
 
+        WarnUnsavedChanges bool ->
+            WarnUnsavedChanges bool
+
 
 
 -- Used by Main.elm
@@ -180,9 +184,17 @@ toCmd options effect =
         SaveToLocalStorage keyValueRecord ->
             saveToLocalStorage keyValueRecord
 
+        WarnUnsavedChanges bool ->
+            updateWarnUnsavedChanges bool
+
 
 
 -- PROMPT TO SAVE
 
 
-port warnUnsavedChanges : Bool -> Cmd msg
+port updateWarnUnsavedChanges : Bool -> Cmd msg
+
+
+warnUnsavedChanges : Bool -> Effect msg
+warnUnsavedChanges bool =
+    WarnUnsavedChanges bool
