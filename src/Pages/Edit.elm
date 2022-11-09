@@ -50,6 +50,7 @@ type alias Model =
     , categories : Api.Status (List String)
     , token : String
     , pfpTooBig : Bool
+    , categoryInvalid : Bool
     , editStatus : Maybe (Api.Status ())
     }
 
@@ -64,6 +65,7 @@ init shared () =
             , categoryField = ""
             , editStatus = Nothing
             , pfpTooBig = False
+            , categoryInvalid = False
             }
     in
     case shared.loginStatus of
@@ -166,7 +168,7 @@ update msg model =
                     ( model, Effect.none )
 
         FieldUpdate (Category category) ->
-            ( { model | categoryField = category }, Effect.none )
+            ( { model | categoryField = category, categoryInvalid = False }, Effect.none )
 
         AddCategory ->
             case model.info of
@@ -190,8 +192,22 @@ update msg model =
 
                                 Nothing ->
                                     model.categoryField
+
+                        newCategoryInvalid =
+                            case valid of
+                                Just _ ->
+                                    False
+
+                                Nothing ->
+                                    True
                     in
-                    ( { model | info = Api.Success newInfo, categoryField = newCategoryField }, Effect.none )
+                    ( { model
+                        | info = Api.Success newInfo
+                        , categoryField = newCategoryField
+                        , categoryInvalid = newCategoryInvalid
+                      }
+                    , Effect.none
+                    )
 
                 _ ->
                     ( model, Effect.none )
@@ -347,7 +363,7 @@ view model =
                         , label = "ABOUT"
                         , spellcheck = True
                         }
-                    , E.paragraph []
+                    , E.paragraph [ Font.color mono_300 ]
                         [ E.link linkStyles { url = "https://www.markdownguide.org/", label = text "Markdown" }
                         , text " is accepted!"
                         ]
@@ -377,7 +393,16 @@ view model =
                         , label = "INSTAGRAM"
                         }
                     , el [ Font.size 24, Font.bold ] (text "Categories")
-                    , CInput.text [ E.htmlAttribute (Attr.list "categories"), onEnter AddCategory ]
+                    , E.paragraph [ Font.color mono_300 ] [ text "Press enter to add a tag. Click one of the categories to remove them." ]
+                    , CInput.text
+                        [ E.htmlAttribute (Attr.list "categories")
+                        , onEnter AddCategory
+                        , if model.categoryInvalid then
+                            Font.color red_400
+
+                          else
+                            Font.color white
+                        ]
                         { onChange = FieldUpdate << Category
                         , text = model.categoryField
                         , placeholder = Nothing
@@ -393,7 +418,7 @@ view model =
 
 viewCategory : String -> E.Element Msg
 viewCategory category =
-    E.row
+    Input.button
         [ E.paddingXY 12 6
         , E.spacing 8
         , Border.rounded 16
@@ -403,7 +428,9 @@ viewCategory category =
         , Font.size 12
         , E.mouseOver [ Bg.color red_200 ]
         ]
-        [ text (String.toUpper category), Input.button [] { onPress = Just (DeleteCategory category), label = text "X" } ]
+        { onPress = Just (DeleteCategory category)
+        , label = text (String.toUpper category)
+        }
 
 
 validCategory : Api.Status (List String) -> List String -> String -> Maybe String

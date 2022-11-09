@@ -146,15 +146,16 @@ view model =
                             ]
                             [ text info.description ]
                         ]
-                    , E.row [ E.padding 32, E.width E.fill ]
+                    , E.row [ E.padding 32, E.spacing 32, E.width E.fill ]
                         [ E.column
                             [ E.spacing 8
                             , E.width (E.fillPortion 4)
                             ]
-                            (el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
-                                :: List.map E.html (Markdown.toHtml Nothing info.about)
-                             -- We can't just throw this into the E.html since links need to look nice, another option is to add a css file specificially for markdown
-                            )
+                            [ el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
+
+                            -- We can't just throw this into the E.html since links need to look nice, another option is to add a css file specificially for markdown
+                            , E.paragraph [] (List.map E.html (Markdown.toHtml Nothing info.about))
+                            ]
                         , E.column
                             [ E.spacing 8
                             , E.alignRight
