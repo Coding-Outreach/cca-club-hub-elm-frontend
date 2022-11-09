@@ -5,6 +5,7 @@ port module Effect exposing
     , pushUrlPath
     , save
     , toCmd
+    , warnUnsavedChanges
     )
 
 {-|
@@ -178,3 +179,10 @@ toCmd options effect =
 
         SaveToLocalStorage keyValueRecord ->
             saveToLocalStorage keyValueRecord
+
+
+
+-- PROMPT TO SAVE
+
+
+port warnUnsavedChanges : Bool -> Cmd msg

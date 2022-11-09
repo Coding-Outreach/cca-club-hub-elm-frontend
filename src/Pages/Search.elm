@@ -184,7 +184,7 @@ viewClubListing listing =
                             , left = 0
                             }
                         ]
-                        [text (Maybe.withDefault "" listing.description)]
+                        [ text (Maybe.withDefault "" listing.description) ]
                     ]
                 ]
         }
