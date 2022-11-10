@@ -41,16 +41,16 @@ page shared route =
 
 type alias Model =
     { searchTerm : String
-    , clubList : Api.Status Api.ClubListResponse
+    , clubs : Api.Status Api.ClubListResponse
     }
 
 
 init : () -> ( Model, Effect Msg )
 init () =
     ( { searchTerm = ""
-      , clubList = Api.Loading
+      , clubs = Api.Loading
       }
-    , Effect.fromCmd (Api.getClubList GotResponse)
+    , Effect.fromCmd (Api.getClubList GotClubs)
     )
 
 
@@ -60,7 +60,7 @@ init () =
 
 type Msg
     = SearchTermChange String
-    | GotResponse (Result Http.Error Api.ClubListResponse)
+    | GotClubs (Result Http.Error Api.ClubListResponse)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -71,11 +71,11 @@ update msg model =
             , Effect.none
             )
 
-        GotResponse (Err err) ->
-            ( { model | clubList = Api.Failure err }, Effect.none )
+        GotClubs (Err err) ->
+            ( { model | clubs = Api.Failure err }, Effect.none )
 
-        GotResponse (Ok list) ->
-            ( { model | clubList = Api.Success list }, Effect.none )
+        GotClubs (Ok list) ->
+            ( { model | clubs = Api.Success list }, Effect.none )
 
 
 
@@ -112,7 +112,7 @@ view model =
                         (E.text "Search for clubs:")
                 }
             , E.column [ E.paddingXY 0 16, E.width E.fill ]
-                [ case model.clubList of
+                [ case model.clubs of
                     Api.Loading ->
                         el [ E.centerX ] (text "Loading...")
 
@@ -152,7 +152,7 @@ scoreSearchTerm searchTerm club =
         []
         [ " " ]
         (String.toLower searchTerm)
-        (String.toLower (club.clubName ++ Maybe.withDefault "" club.description ++ club.meetTime))
+        (String.toLower (club.clubName ++ club.description ++ club.meetTime))
         |> .score
 
 
@@ -184,7 +184,7 @@ viewClubListing listing =
                             , left = 0
                             }
                         ]
-                        [ text (Maybe.withDefault "" listing.description) ]
+                        [ text listing.description ]
                     ]
                 ]
         }

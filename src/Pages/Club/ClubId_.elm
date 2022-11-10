@@ -154,7 +154,10 @@ view model =
                             [ el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
 
                             -- We can't just throw this into the E.html since links need to look nice, another option is to add a css file specificially for markdown
-                            , E.paragraph [] (List.map E.html (Markdown.toHtml Nothing info.about))
+                            , info.about
+                                |> Markdown.toHtml Nothing
+                                |> List.map E.html
+                                |> E.paragraph []
                             ]
                         , E.column
                             [ E.spacing 8

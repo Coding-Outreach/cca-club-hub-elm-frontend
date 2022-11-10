@@ -1,5 +1,6 @@
 module Api exposing (..)
 
+import Array exposing (Array)
 import Http
 import Json.Decode as D
 import Json.Encode as E
@@ -162,15 +163,29 @@ socialsDecoder =
 type alias ClubListResponse =
     List ClubListItem
 
+type alias FeaturedClubsResponse =
+    Array ClubInfo
+
 
 type alias ClubListItem =
     { id : String
     , clubName : String
     , meetTime : String
-    , description : Maybe String
+    , description : String
     , profilePictureUrl : String
     , categories : List String
     }
+
+
+clubListItemDecoder : D.Decoder ClubListItem
+clubListItemDecoder =
+    D.map6 ClubListItem
+        (D.field "id" D.string)
+        (D.field "clubName" D.string)
+        (D.field "meetTime" D.string)
+        (D.field "description" D.string)
+        (D.field "profilePictureUrl" D.string)
+        (D.field "categories" (D.list D.string))
 
 
 getClubList : (Result Http.Error ClubListResponse -> msg) -> Cmd msg
@@ -183,15 +198,20 @@ getClubList msg =
 
 clubListResponseDecoder : D.Decoder ClubListResponse
 clubListResponseDecoder =
-    D.list
-        (D.map6 ClubListItem
-            (D.field "id" D.string)
-            (D.field "clubName" D.string)
-            (D.field "meetTime" D.string)
-            (D.field "description" (D.maybe D.string))
-            (D.field "profilePictureUrl" D.string)
-            (D.field "categories" (D.list D.string))
-        )
+    D.list clubListItemDecoder
+
+
+getFeaturedClubList : (Result Http.Error FeaturedClubsResponse -> msg) -> Cmd msg
+getFeaturedClubList msg =
+    Http.get
+        { url = backendUrl ++ "/club/list/featured"
+        , expect = Http.expectJson msg featuredClubsResponseDecoder
+        }
+
+
+featuredClubsResponseDecoder : D.Decoder FeaturedClubsResponse
+featuredClubsResponseDecoder =
+    D.array clubInfoDecoder
 
 
 getCategories : (Result Http.Error (List String) -> msg) -> Cmd msg
