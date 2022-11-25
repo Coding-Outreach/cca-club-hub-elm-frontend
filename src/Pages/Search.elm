@@ -10,6 +10,7 @@ import Element.Background as Bg
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import Element.Keyed as Keyed
 import Element.Region as Region
 import Fuzzy
 import Http
@@ -120,7 +121,7 @@ view model =
                         el [ E.centerX ] (text ("Oh no! Something went wrong: " ++ Debug.toString err))
 
                     Api.Success list ->
-                        E.column
+                        Keyed.column
                             [ E.width (E.fill |> E.maximum (16 * 48))
                             , E.centerX
                             ]
@@ -156,9 +157,10 @@ scoreSearchTerm searchTerm club =
         |> .score
 
 
-viewClubListing : Api.ClubListItem -> Element msg
+viewClubListing : Api.ClubListItem -> ( String, Element msg )
 viewClubListing listing =
-    E.link [ E.width E.fill, Bg.color mono_600 ]
+    ( listing.id
+    , E.link [ E.width E.fill, Bg.color mono_600 ]
         { url = "/club/" ++ listing.id
         , label =
             E.row [ E.padding 16, E.spacing 16 ]
@@ -188,3 +190,4 @@ viewClubListing listing =
                     ]
                 ]
         }
+    )

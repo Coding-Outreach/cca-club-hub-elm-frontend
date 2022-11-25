@@ -104,9 +104,7 @@ update msg model =
 
         GotResponse (Ok res) ->
             ( model
-            , Effect.batch
-                [ Effect.fromSharedMsg (Shared.Msg.Login res)
-                ]
+            , Effect.fromSharedMsg (Shared.Msg.Login res)
             )
 
         GotResponse (Err err) ->
