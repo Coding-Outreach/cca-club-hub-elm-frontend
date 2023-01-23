@@ -17,15 +17,11 @@ import Http
 import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
-import Route.Path
 import Shared
 import Shared.Msg
 import View exposing (View)
-
-
-layout : Layout
-layout =
-    Layout.Navbar
+import Layouts
+import Shared.Model
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -36,6 +32,7 @@ page shared route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 
@@ -53,7 +50,7 @@ type alias Model =
 init : Shared.Model -> () -> ( Model, Effect Msg )
 init shared () =
     ( Model "" "" False ""
-    , if shared.loginStatus /= Shared.NotLoggedIn then
+    , if shared.loginStatus /= Shared.Model.NotLoggedIn then
         Effect.pushUrlPath "/"
 
       else
@@ -100,11 +97,11 @@ update msg model =
             ( { model | showPassword = not model.showPassword }, Effect.none )
 
         Submit ->
-            ( model, Effect.fromCmd (Api.doLogin model.username model.password GotResponse) )
+            ( model, Effect.sendCmd (Api.doLogin model.username model.password GotResponse) )
 
         GotResponse (Ok res) ->
             ( model
-            , Effect.fromSharedMsg (Shared.Msg.Login res)
+            , Effect.sendSharedMsg (Shared.Msg.Login res)
             )
 
         GotResponse (Err err) ->

@@ -12,16 +12,12 @@ import Element.Input as Input
 import Element.Region as Region
 import Http
 import Layout exposing (Layout)
+import Layouts
 import Markdown
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-
-
-layout : Layout
-layout =
-    Layout.Navbar
 
 
 page : Shared.Model -> Route { clubId : String } -> Page Model Msg
@@ -32,6 +28,7 @@ page shared route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 
@@ -51,9 +48,8 @@ init route () =
     ( { clubId = route.params.clubId
       , clubInfo = Api.Loading
       }
-    , Effect.fromCmd (Api.getClubInfo route.params.clubId GotResponse)
+    , Effect.sendCmd (Api.getClubInfo route.params.clubId GotResponse)
     )
-
 
 
 -- UPDATE

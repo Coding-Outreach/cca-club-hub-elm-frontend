@@ -2,7 +2,6 @@ module Shared exposing
     ( Flags, decoder
     , Model, Msg
     , init, update, subscriptions
-    , LoginStatus(..)
     )
 
 {-|
@@ -14,6 +13,7 @@ module Shared exposing
 -}
 
 import Api
+import Shared.Model exposing (LoginStatus(..))
 import Dict
 import Effect exposing (Effect)
 import Json.Decode as D
@@ -41,17 +41,7 @@ decoder =
 
 -- INIT
 
-
-type alias Model =
-    { loginStatus : LoginStatus
-    }
-
-
-type LoginStatus
-    = NotLoggedIn
-    | LoggedIn { token : String, clubId : String }
-
-
+type alias Model = Shared.Model.Model
 
 -- check if token is expired or not.
 
@@ -101,7 +91,7 @@ update route msg model =
                     , Effect.batch
                         [ Effect.save { key = "token", value = E.string res.token }
                         , Effect.pushRoute
-                            { path = Route.Path.Club__ClubId_ { clubId = clubId }
+                            { path = Route.Path.Club_ClubId_ { clubId = clubId }
                             , query = Dict.empty
                             , hash = Nothing
                             }

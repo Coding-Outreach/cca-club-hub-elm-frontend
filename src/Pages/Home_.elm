@@ -18,12 +18,7 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-
-
-layout : Layout
-layout =
-    Layout.Navbar
-
+import Layouts
 
 page : Shared.Model -> Route () -> Page Model Msg
 page shared route =
@@ -33,6 +28,7 @@ page shared route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 
@@ -47,7 +43,7 @@ type alias Model =
 init : () -> ( Model, Effect Msg )
 init () =
     ( { clubs = Api.Loading }
-    , Effect.fromCmd (Api.getFeaturedClubList GotClubs)
+    , Effect.sendCmd (Api.getFeaturedClubList GotClubs)
     )
 
 

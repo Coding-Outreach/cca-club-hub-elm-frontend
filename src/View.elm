@@ -14,8 +14,9 @@ module View exposing
 
 import Browser
 import Color exposing (..)
+import Route exposing (Route)
 import Element as E exposing (Element)
-import Html
+import Shared.Model
 
 
 type alias View msg =
@@ -27,8 +28,13 @@ type alias View msg =
 {-| Used internally by Elm Land to create your application
 so it works with Elm's expected `Browser.Document msg` type.
 -}
-toBrowserDocument : View msg -> Browser.Document msg
-toBrowserDocument view =
+toBrowserDocument :
+    { shared : Shared.Model.Model
+    , route : Route ()
+    , view : View msg
+    }
+    -> Browser.Document msg
+toBrowserDocument { view } =
     Browser.Document ("CCA Club Hub | " ++ view.title)
         [ E.layoutWith
             { options =
@@ -44,7 +50,8 @@ toBrowserDocument view =
         ]
 
 
-{-| Used internally by Elm Land to wire up your pages together.
+
+{-| Used internally by Elm Land to connect your pages together.
 -}
 map : (msg1 -> msg2) -> View msg1 -> View msg2
 map fn view =

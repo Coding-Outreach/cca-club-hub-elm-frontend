@@ -21,13 +21,10 @@ import Layout exposing (Layout)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Shared.Model exposing (LoginStatus(..))
 import Task
 import View exposing (View)
-
-
-layout : Layout
-layout =
-    Layout.Navbar
+import Layouts
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -38,6 +35,7 @@ page shared route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 
@@ -69,14 +67,14 @@ init shared () =
             }
     in
     case shared.loginStatus of
-        Shared.NotLoggedIn ->
+        Shared.Model.NotLoggedIn ->
             ( initial
-            , Effect.pushUrlPath "/"
+            , Effect.pushUrlPath  "/"
             )
 
-        Shared.LoggedIn { clubId, token } ->
+        Shared.Model.LoggedIn { clubId, token } ->
             ( { initial | token = token }
-            , Effect.batch [ Effect.fromCmd (Api.getCategories GotCategories), Effect.fromCmd (Api.getClubInfo clubId GotInitialData) ]
+            , Effect.batch [ Effect.sendCmd (Api.getCategories GotCategories), Effect.sendCmd (Api.getClubInfo clubId GotInitialData) ]
             )
 
 
@@ -239,12 +237,12 @@ update msg model =
 
         ProfilePictureRequested ->
             ( model
-            , Effect.fromCmd (Select.file [ "image/png", "image/jpeg", "image/webp" ] ProfilePictureLoaded)
+            , Effect.sendCmd (Select.file [ "image/png", "image/jpeg", "image/webp" ] ProfilePictureLoaded)
             )
 
         ProfilePictureLoaded file ->
             ( model
-            , Effect.fromCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
+            , Effect.sendCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
             )
 
         FieldUpdate field ->
@@ -279,7 +277,7 @@ update msg model =
             case model.info of
                 Api.Success info ->
                     ( { model | editStatus = Just Api.Loading }
-                    , Effect.fromCmd (Api.doClubEdit model.token info GotSubmit)
+                    , Effect.sendCmd (Api.doClubEdit model.token info GotSubmit)
                     )
 
                 _ ->

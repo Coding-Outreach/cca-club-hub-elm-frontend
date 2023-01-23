@@ -15,15 +15,11 @@ import Element.Region as Region
 import Fuzzy
 import Http
 import Layout exposing (Layout)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-
-
-layout : Layout
-layout =
-    Layout.Navbar
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -34,6 +30,7 @@ page shared route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 
@@ -51,7 +48,7 @@ init () =
     ( { searchTerm = ""
       , clubs = Api.Loading
       }
-    , Effect.fromCmd (Api.getClubList GotClubs)
+    , Effect.sendCmd (Api.getClubList GotClubs)
     )
 
 
