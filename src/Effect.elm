@@ -1,10 +1,10 @@
 port module Effect exposing
     ( Effect
     , none, batch
-    , sendCmd, sendMsg, sendSharedMsg
+    , sendCmd, sendMsg
     , pushRoute, replaceRoute, loadExternalUrl
     , map, toCmd
-    , pushUrlPath, save, warnUnsavedChanges
+    , pushUrlPath, save, sendSharedMsg, warnUnsavedChanges
     )
 
 {-|

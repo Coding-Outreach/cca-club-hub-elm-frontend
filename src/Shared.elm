@@ -13,13 +13,13 @@ module Shared exposing
 -}
 
 import Api
-import Shared.Model exposing (LoginStatus(..))
 import Dict
 import Effect exposing (Effect)
 import Json.Decode as D
 import Json.Encode as E
 import Route exposing (Route)
 import Route.Path
+import Shared.Model exposing (LoginStatus(..))
 import Shared.Msg exposing (Msg(..))
 import Token
 
@@ -41,7 +41,11 @@ decoder =
 
 -- INIT
 
-type alias Model = Shared.Model.Model
+
+type alias Model =
+    Shared.Model.Model
+
+
 
 -- check if token is expired or not.
 

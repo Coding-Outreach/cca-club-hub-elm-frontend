@@ -163,6 +163,7 @@ socialsDecoder =
 type alias ClubListResponse =
     List ClubListItem
 
+
 type alias FeaturedClubsResponse =
     Array ClubInfo
 
@@ -232,11 +233,29 @@ checkResetUrl uid msg =
 
 sendResetRequest : String -> (Result Http.Error () -> msg) -> Cmd msg
 sendResetRequest email msg =
-    Http.post
-        { url = backendUrl ++ "/password/reset"
-        , body = Http.jsonBody (
-            E.object
-                [ ( "email", E.string email ) ]
-        )
+    Http.request
+        { method = "POST"
+        , headers =
+            [ Http.header "Access-Control-Allow-Headers" "Origin, Content-Type Access-Control-Allow-Headers"
+            ]
+        , url = backendUrl ++ "/password/reset"
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "email", E.string email ) ]
+                )
         , expect = Http.expectWhatever msg
+        , timeout = Nothing
+        , tracker = Nothing
         }
+
+
+
+-- Http.post
+--     { url = backendUrl ++ "/password/reset"
+--     , body = Http.jsonBody (
+--         E.object
+--             [ ( "email", E.string email ) ]
+--     )
+--     , expect = Http.expectWhatever msg
+--     }

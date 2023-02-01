@@ -13,12 +13,13 @@ import Element.Region as Region
 import Html.Attributes as Attr
 import Http
 import Layout exposing (Layout)
+import Layouts
 import Markdown
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-import Layouts
+
 
 page : Shared.Model -> Route () -> Page Model Msg
 page shared route =

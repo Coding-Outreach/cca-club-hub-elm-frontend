@@ -15,13 +15,13 @@ import Element.Input as Input
 import Element.Region as Region
 import Http
 import Layout exposing (Layout)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Shared.Model
 import Shared.Msg
 import View exposing (View)
-import Layouts
-import Shared.Model
 
 
 page : Shared.Model -> Route () -> Page Model Msg

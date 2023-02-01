@@ -1,19 +1,19 @@
 module Pages.ForgotPassword exposing (Model, Msg, page)
 
 import Api
+import Components.Input as CInput
 import Effect exposing (Effect)
-import Http
-import Page exposing (Page)
-import Route exposing (Route)
-import Shared
-import View exposing (View)
 import Element as E exposing (el, text)
 import Element.Background as Bg
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
-import Components.Input as CInput
+import Http
+import Page exposing (Page)
+import Route exposing (Route)
+import Shared
+import View exposing (View)
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -61,6 +61,7 @@ update msg model =
             case model.email of
                 Just email ->
                     ( { model | requested = True }, Effect.sendCmd (Api.sendResetRequest email Response) )
+
                 Nothing ->
                     ( model, Effect.none )
 
@@ -76,10 +77,12 @@ view model =
                 { title = "Request sent"
                 , body = text "Request sent"
                 }
+
             Err status ->
                 { title = "Request failed"
                 , body = text (Debug.toString status)
                 }
+
     else
         { title = "Login"
         , body =
@@ -100,4 +103,3 @@ view model =
                 , CInput.button [] { onPress = Just Submit, label = text "Reset" }
                 ]
         }
-            

@@ -18,13 +18,13 @@ import Html.Events
 import Http
 import Json.Decode as D
 import Layout exposing (Layout)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import Shared.Model exposing (LoginStatus(..))
 import Task
 import View exposing (View)
-import Layouts
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -69,7 +69,7 @@ init shared () =
     case shared.loginStatus of
         Shared.Model.NotLoggedIn ->
             ( initial
-            , Effect.pushUrlPath  "/"
+            , Effect.pushUrlPath "/"
             )
 
         Shared.Model.LoggedIn { clubId, token } ->
