@@ -31,8 +31,8 @@ type Msg
     | IllegalInstruction
 
 
-fromHttpError : Result Http.Error () -> Msg
-fromHttpError err =
+fromHttpResult : Result Http.Error () -> Msg
+fromHttpResult err =
     case err of
         Ok _ ->
             SegmentationFault
@@ -44,7 +44,7 @@ fromHttpError err =
 init : Route { reset : String } -> () -> ( Model, Effect Msg )
 init route _ =
     ( Loading
-    , Effect.fromCmd (Api.checkResetUrl route.params.reset fromHttpError)
+    , Effect.fromCmd (Api.checkResetUrl route.params.reset fromHttpResult)
     )
 
 
