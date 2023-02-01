@@ -228,3 +228,15 @@ checkResetUrl uid msg =
         { url = backendUrl ++ "/password/" ++ uid
         , expect = Http.expectWhatever msg
         }
+
+
+sendResetRequest : String -> (Result Http.Error () -> msg) -> Cmd msg
+sendResetRequest email msg =
+    Http.post
+        { url = backendUrl ++ "/password/reset"
+        , body = Http.jsonBody (
+            E.object
+                [ ( "email", E.string email ) ]
+        )
+        , expect = Http.expectWhatever msg
+        }

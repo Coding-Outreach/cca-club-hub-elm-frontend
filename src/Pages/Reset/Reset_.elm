@@ -44,7 +44,7 @@ fromHttpResult err =
 init : Route { reset : String } -> () -> ( Model, Effect Msg )
 init route _ =
     ( Loading
-    , Effect.fromCmd (Api.checkResetUrl route.params.reset fromHttpResult)
+    , Effect.sendCmd (Api.checkResetUrl route.params.reset fromHttpResult)
     )
 
 
