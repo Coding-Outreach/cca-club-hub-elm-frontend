@@ -6,6 +6,8 @@ import Color exposing (..)
 import Components.Input as CInput
 import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
+import Element.Font as Font
+import Element.Region as Region
 import Http
 import Page exposing (Page)
 import Route exposing (Route)
@@ -14,6 +16,8 @@ import Shared
 import Shared.Model exposing (LoginStatus(..))
 import Token exposing (getClubIdFromToken)
 import View exposing (View)
+import Layout exposing (Layout)
+import Layouts
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -24,6 +28,7 @@ page shared route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 type Msg
@@ -117,10 +122,10 @@ view model =
     { title = "Password Reset"
     , body =
         case model.response of
-            Just Ok _ ->
+            Just (Ok _) ->
                 el [ E.centerX, E.centerY ] (text "Password reset successfully")
 
-            Just Err status ->
+            Just (Err status) ->
                 el [ E.centerX, E.centerY ]
                     (Debug.toString status
                         |> text

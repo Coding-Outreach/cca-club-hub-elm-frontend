@@ -4,16 +4,16 @@ import Api
 import Components.Input as CInput
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
-import Element.Background as Bg
-import Element.Border as Border
-import Element.Font as Font
-import Element.Input as Input
-import Element.Region as Region
 import Http
+import Layouts
+import Element.Font as Font
+import Element.Region as Region
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
+import Layout exposing (Layout)
+import Layouts
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -24,6 +24,7 @@ page _ route =
         , subscriptions = subscriptions
         , view = view
         }
+        |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
 
 type alias Model =
@@ -73,10 +74,10 @@ view model =
     { title = "Login"
     , body =
         case model.response of
-            Just Ok _ ->
+            Just (Ok _) ->
                 el [ E.centerX, E.centerY ] (text "Password reset request sent. Please check your email.")
 
-            Just Err status ->
+            Just (Err status) ->
                 el [ E.centerX, E.centerY ]
                     (Debug.toString status
                         |> text
