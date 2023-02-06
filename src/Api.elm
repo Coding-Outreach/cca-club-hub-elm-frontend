@@ -250,6 +250,19 @@ sendResetRequest email msg =
         }
 
 
+sendPasswordReset : String -> String -> (Result Http.Error () -> msg) -> Cmd msg
+sendPasswordReset clubId password msg =
+    Http.post
+        { url = backendUrl ++ "/password/" ++ clubId
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "password", E.string password ) ]
+                )
+        , expect = Http.expectWhatever msg
+        }
+
+
 
 -- Http.post
 --     { url = backendUrl ++ "/password/reset"

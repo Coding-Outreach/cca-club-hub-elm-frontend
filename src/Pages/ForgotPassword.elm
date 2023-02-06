@@ -28,8 +28,7 @@ page _ route =
 
 type alias Model =
     { email : Maybe String
-    , requested : Bool
-    , response : Result Http.Error ()
+    , response : Maybe (Result Http.Error ())
     }
 
 
@@ -41,7 +40,7 @@ type Msg
 
 init : () -> ( Model, Effect Msg )
 init _ =
-    ( { email = Nothing, requested = False, response = Ok () }
+    ( { email = Nothing, response = Nothing }
     , Effect.none
     )
 
@@ -60,46 +59,44 @@ update msg model =
         Submit ->
             case model.email of
                 Just email ->
-                    ( { model | requested = True }, Effect.sendCmd (Api.sendResetRequest email Response) )
+                    ( model, Effect.sendCmd (Api.sendResetRequest email Response) )
 
                 Nothing ->
                     ( model, Effect.none )
 
         Response res ->
-            ( { model | response = res }, Effect.none )
+            ( { model | response = Just res }, Effect.none )
 
 
 view : Model -> View Msg
 view model =
-    if model.requested then
+    { title = "Login"
+    , body =
         case model.response of
-            Ok () ->
-                { title = "Request sent"
-                , body = text "Request sent"
-                }
+            Just Ok _ ->
+                el [ E.centerX, E.centerY ] (text "Password reset request sent. Please check your email.")
 
-            Err status ->
-                { title = "Request failed"
-                , body = text (Debug.toString status)
-                }
+            Just Err status ->
+                el [ E.centerX, E.centerY ]
+                    (Debug.toString status
+                        |> text
+                    )
 
-    else
-        { title = "Login"
-        , body =
-            E.column [ E.centerX, E.centerY, E.spacing 8, E.width (E.fill |> E.maximum (16 * 24)) ]
-                [ el
-                    [ E.paddingXY 0 8
-                    , Font.size 28
-                    , Font.bold
-                    , Region.heading 1
+            _ ->
+                E.column [ E.centerX, E.centerY, E.spacing 8, E.width (E.fill |> E.maximum (16 * 24)) ]
+                    [ el
+                        [ E.paddingXY 0 8
+                        , Font.size 28
+                        , Font.bold
+                        , Region.heading 1
+                        ]
+                        (E.text "Password Reset")
+                    , CInput.username []
+                        { onChange = UpdateEmail
+                        , text = Maybe.withDefault "" model.email
+                        , placeholder = Nothing
+                        , label = "EMAIL"
+                        }
+                    , CInput.button [] { onPress = Just Submit, label = text "Reset" }
                     ]
-                    (E.text "Password Reset")
-                , CInput.username []
-                    { onChange = UpdateEmail
-                    , text = Maybe.withDefault "" model.email
-                    , placeholder = Nothing
-                    , label = "EMAIL"
-                    }
-                , CInput.button [] { onPress = Just Submit, label = text "Reset" }
-                ]
-        }
+    }
