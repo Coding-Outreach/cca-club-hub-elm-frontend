@@ -52,11 +52,12 @@ init route () =
     )
 
 
+
 -- UPDATE
 
 
 type Msg
-    = GotResponse (Result Http.Error Api.ClubInfo)
+    = GotResponse (Result Api.Error Api.ClubInfo)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -104,15 +105,10 @@ view model =
                 el [ E.centerX, E.centerY ] (text "Loading...")
 
             Api.Failure err ->
-                case err of
-                    Http.BadStatus 404 ->
-                        E.column [ E.centerX, E.centerY ]
-                            [ text "Club not found!"
-                            , E.link [ Font.color red_300, Font.underline, E.centerX ] { url = "/", label = text "Go Back" }
-                            ]
-
-                    _ ->
-                        el [ E.centerX, E.centerY ] (text ("Something went wrong: " ++ Debug.toString err))
+                E.column [ E.centerX, E.centerY ]
+                    [ text (Api.errorToString err)
+                    , E.link [ Font.color red_300, Font.underline, E.centerX ] { url = "/", label = text "Go Back" }
+                    ]
 
             Api.Success info ->
                 E.column [ E.padding 32, E.width E.fill, E.height E.fill ]

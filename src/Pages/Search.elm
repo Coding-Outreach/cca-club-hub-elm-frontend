@@ -58,7 +58,7 @@ init () =
 
 type Msg
     = SearchTermChange String
-    | GotClubs (Result Http.Error Api.ClubListResponse)
+    | GotClubs (Result Api.Error Api.ClubListResponse)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )

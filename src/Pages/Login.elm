@@ -15,13 +15,13 @@ import Element.Input as Input
 import Element.Region as Region
 import Http
 import Layout exposing (Layout)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Shared.Model
 import Shared.Msg
 import View exposing (View)
-import Layouts
-import Shared.Model
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -66,7 +66,7 @@ type Msg
     = FieldUpdate Field String
     | ToggleShow
     | Submit
-    | GotResponse (Result Http.Error Api.LoginResponse)
+    | GotResponse (Result Api.Error Api.LoginResponse)
 
 
 type Field
@@ -105,27 +105,7 @@ update msg model =
             )
 
         GotResponse (Err err) ->
-            case err of
-                Http.BadUrl url ->
-                    ( { model | badLogin = "Bad Url: " ++ url }, Effect.none )
-
-                Http.BadStatus 401 ->
-                    ( { model | badLogin = "Invalid username or password" }, Effect.none )
-
-                Http.BadStatus 404 ->
-                    ( { model | badLogin = "Backend not found" }, Effect.none )
-
-                Http.BadStatus code ->
-                    ( { model | badLogin = "Error. HTTP status code: " ++ String.fromInt code }, Effect.none )
-
-                Http.BadBody error ->
-                    ( { model | badLogin = "Failed to parse response: " ++ error }, Effect.none )
-
-                Http.Timeout ->
-                    ( { model | badLogin = "Timed Out" }, Effect.none )
-
-                Http.NetworkError ->
-                    ( { model | badLogin = "Network error" }, Effect.none )
+            ( { model | badLogin = Api.errorToString err }, Effect.none )
 
 
 

@@ -57,7 +57,7 @@ init () =
 
 
 type Msg
-    = GotClubs (Result Http.Error Api.FeaturedClubsResponse)
+    = GotClubs (Result Api.Error Api.FeaturedClubsResponse)
     | Select Int
     | CountDown Time.Posix
 
