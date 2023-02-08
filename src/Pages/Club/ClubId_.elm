@@ -18,6 +18,7 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
+import Html.Attributes
 
 
 page : Shared.Model -> Route { clubId : String } -> Page Model Msg
@@ -149,7 +150,7 @@ view model =
                             , info.about
                                 |> Markdown.toHtml Nothing
                                 |> List.map E.html
-                                |> E.paragraph []
+                                |> E.paragraph [ E.htmlAttribute (Html.Attributes.class "aboutMd")]
                             ]
                         , E.column
                             [ E.spacing 8
@@ -185,7 +186,7 @@ viewProfilePicture url clubName =
         , E.moveRight 32
         , Bg.color mono_600
         ]
-        { src = url
+        { src = Api.backendUrl ++ url
         , description = clubName ++ "'s profile picture"
         }
 

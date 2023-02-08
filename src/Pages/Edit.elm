@@ -239,7 +239,7 @@ update msg model =
                         newInfo =
                             { info | profilePictureUrl = url }
                     in
-                    ( { model | info = Api.Success newInfo }, Effect.none )
+                    ( { model | info = Api.Success newInfo, badPfp = Nothing }, Effect.none )
 
                 _ ->
                     ( model, Effect.none )

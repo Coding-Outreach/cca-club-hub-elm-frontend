@@ -205,7 +205,7 @@ doClubEdit : String -> ClubInfo -> (Result Error () -> msg) -> Cmd msg
 doClubEdit token info toMsg =
     Jwt.Http.post token
         { body = Http.jsonBody (clubInfoEditEncoder info)
-        , url = apiUrl ++ "/edit/" ++ info.id
+        , url = apiUrl ++ "/edit/info"
         , expect = expectWhatever toMsg
         }
 

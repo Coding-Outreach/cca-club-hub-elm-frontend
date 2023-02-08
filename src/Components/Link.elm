@@ -7,4 +7,4 @@ import Element.Font as Font
 
 linkStyles : List (E.Attribute msg)
 linkStyles =
-    [ Font.underline, Font.color red_400 ]
+    [ Font.underline, Font.color red_300 ]
