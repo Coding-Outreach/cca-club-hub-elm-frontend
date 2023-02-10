@@ -3,12 +3,16 @@ module Pages.PasswordReset exposing (Model, Msg, page)
 import Api
 import Array exposing (Array)
 import Color exposing (..)
+import Components.Icon exposing (icon)
 import Components.Input as CInput
 import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
+import Element.Events as Events
 import Element.Font as Font
 import Element.Region as Region
 import Http
+import Layout exposing (Layout)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Set exposing (Set)
@@ -16,8 +20,6 @@ import Shared
 import Shared.Model exposing (LoginStatus(..))
 import Token exposing (getClubIdFromToken)
 import View exposing (View)
-import Layout exposing (Layout)
-import Layouts
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -32,13 +34,19 @@ page shared route =
 
 
 type Msg
-    = UpdatePassword Int String
+    = UpdatePassword String
+    | UpdateConfirmation String
     | Submit
     | ResetResponse (Result Http.Error ())
+    | TogglePassword
+    | ToggleConfirmation
 
 
 type alias Model =
-    { passwords : Array String
+    { password : String
+    , confirmation : String
+    , showPassword : Bool
+    , showConfirmation : Bool
     , token : String
     , response : Maybe (Result Http.Error ())
     }
@@ -48,7 +56,10 @@ init : Shared.Model -> () -> ( Model, Effect Msg )
 init shared _ =
     let
         initial =
-            { passwords = Array.repeat 2 ""
+            { password = ""
+            , confirmation = ""
+            , showPassword = False
+            , showConfirmation = False
             , token = ""
             , response = Nothing
             }
@@ -73,48 +84,39 @@ subscriptions _ =
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        UpdatePassword index password ->
-            ( { model | passwords = Array.set index password model.passwords }, Effect.none )
+        UpdatePassword password ->
+            ( { model | password = password }, Effect.none )
+
+        UpdateConfirmation password ->
+            ( { model | confirmation = password }, Effect.none )
+
+        TogglePassword ->
+            ( { model | showPassword = not model.showPassword }, Effect.none )
+
+        ToggleConfirmation ->
+            ( { model | showConfirmation = not model.showConfirmation }, Effect.none )
 
         Submit ->
-            let
-                passwords =
-                    Array.toList model.passwords
-                        |> Set.fromList
-            in
-            case Set.toList passwords of
-                password :: [] ->
-                    ( model
-                    , Api.sendPasswordReset model.token password ResetResponse
-                        |> Effect.sendCmd
-                    )
+            if (String.length model.password + String.length model.confirmation /= 0) && (model.password == model.confirmation) then
+                ( model
+                , Api.sendPasswordReset model.token model.password ResetResponse
+                    |> Effect.sendCmd
+                )
 
-                _ ->
-                    ( model, Effect.none )
+            else
+                ( model, Effect.none )
 
         ResetResponse res ->
             ( { model | response = Just res }, Effect.none )
 
 
-passwordField : Model -> Int -> Element Msg
-passwordField model index =
-    let
-        label =
-            if index == 0 then
-                "password"
+fieldIcon : Bool -> String
+fieldIcon show =
+    if show then
+        "fa-eye-slash"
 
-            else
-                "password confirmation"
-    in
-    CInput.currentPassword []
-        { onChange = UpdatePassword index
-        , text =
-            Array.get index model.passwords
-                |> Maybe.withDefault ""
-        , placeholder = Nothing
-        , label = label
-        , show = True
-        }
+    else
+        "fa-eye"
 
 
 view : Model -> View Msg
@@ -132,18 +134,48 @@ view model =
                     )
 
             _ ->
-                let
-                    fields =
-                        Array.length model.passwords
-                            - 1
-                            |> List.range 0
-                            |> List.map (passwordField model)
-                in
                 E.column [ E.centerX, E.centerY ]
-                    ([ el [] (E.text "Password Reset")
-                     ]
-                        ++ fields
-                        ++ [ CInput.button [] { onPress = Just Submit, label = text "Reset" }
-                           ]
-                    )
+                    [ el [] (E.text "Password Reset")
+                    , CInput.currentPassword
+                        [ E.inFront
+                            (el
+                                [ E.centerY
+                                , E.alignRight
+                                , E.paddingXY 8 0
+                                , Font.color mono_200
+                                , E.mouseOver [ Font.color mono_400 ]
+                                , E.pointer
+                                , Events.onClick TogglePassword
+                                ]
+                                (icon ("fa-regular " ++ fieldIcon model.showPassword))
+                            )
+                        ]
+                        { onChange = UpdatePassword
+                        , text = model.password
+                        , placeholder = Nothing
+                        , label = "PASSWORD"
+                        , show = model.showPassword
+                        }
+                    , CInput.currentPassword
+                        [ E.inFront
+                            (el
+                                [ E.centerY
+                                , E.alignRight
+                                , E.paddingXY 8 0
+                                , Font.color mono_200
+                                , E.mouseOver [ Font.color mono_400 ]
+                                , E.pointer
+                                , Events.onClick ToggleConfirmation
+                                ]
+                                (icon ("fa-regular " ++ fieldIcon model.showConfirmation))
+                            )
+                        ]
+                        { onChange = UpdateConfirmation
+                        , text = model.confirmation
+                        , placeholder = Nothing
+                        , label = "PASSWORD CONFIRMATION"
+                        , show = model.showConfirmation
+                        }
+                    , CInput.button [] { onPress = Just Submit, label = text "Reset" }
+                    ]
     }

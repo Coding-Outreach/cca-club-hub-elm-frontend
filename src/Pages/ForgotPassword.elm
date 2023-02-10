@@ -4,16 +4,15 @@ import Api
 import Components.Input as CInput
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
-import Http
-import Layouts
 import Element.Font as Font
 import Element.Region as Region
+import Http
+import Layout exposing (Layout)
+import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-import Layout exposing (Layout)
-import Layouts
 
 
 page : Shared.Model -> Route () -> Page Model Msg
