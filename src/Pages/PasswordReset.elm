@@ -113,10 +113,10 @@ update msg model =
 fieldIcon : Bool -> String
 fieldIcon show =
     if show then
-        "fa-eye-slash"
+        "fa-eye"
 
     else
-        "fa-eye"
+        "fa-eye-slash"
 
 
 view : Model -> View Msg
