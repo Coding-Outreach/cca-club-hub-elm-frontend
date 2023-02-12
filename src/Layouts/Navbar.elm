@@ -10,7 +10,9 @@ import Html exposing (Html)
 import Html.Attributes exposing (class)
 import Layout exposing (Layout)
 import Route exposing (Route)
+import Route.Path
 import Shared
+import Shared.Model exposing (LoginStatus(..))
 import View exposing (View)
 
 
@@ -23,7 +25,7 @@ layout settings shared route =
     Layout.new
         { init = init
         , update = update
-        , view = view
+        , view = view shared route
         , subscriptions = subscriptions
         }
 
@@ -69,8 +71,8 @@ subscriptions model =
 -- VIEW
 
 
-view : { fromMsg : Msg -> mainMsg, content : View mainMsg, model : Model } -> View mainMsg
-view { fromMsg, model, content } =
+view : Shared.Model -> Route () -> { fromMsg : Msg -> mainMsg, content : View mainMsg, model : Model } -> View mainMsg
+view shared route { fromMsg, model, content } =
     { title = content.title
     , body =
         E.column
@@ -82,21 +84,48 @@ view { fromMsg, model, content } =
             ]
             [ E.row
                 [ Bg.color mono_800
-                , E.spacing 32
+                , E.spacing 16
                 , E.paddingXY 32 16
                 , E.width E.fill
                 , Font.size 20
                 ]
                 [ E.link
                     [ Font.bold
-                    , E.mouseOver [ Bg.color red_500 ]
-                    , Border.rounded 16
+                    , Border.widthEach { bottom = 4, top = 0, left = 0, right = 0 }
+                    , Border.color mono_800
+                    , E.mouseOver [ Border.color red_500 ]
                     , E.paddingXY 8 4
                     ]
                     { url = "/", label = E.text "CCA CLUB HUB" }
-                , E.link [] { url = "/about", label = E.text "About" }
-                , E.link [] { url = "/login", label = E.text "Login" }
+                , E.link (highlightIfSelected (route.path == Route.Path.Search)) { url = "/search", label = E.text "Search" }
+                , E.row [ E.spacing 16, E.alignRight ]
+                    (case shared.loginStatus of
+                        NotLoggedIn ->
+                            [ E.link (highlightIfSelected (route.path == Route.Path.Login)) { url = "/login", label = E.text "Login" } ]
+
+                        LoggedIn { clubId } ->
+                            [ E.link (highlightIfSelected (route.path == Route.Path.Club_ClubId_ { clubId = clubId }))
+                                { url = "/club/" ++ clubId, label = E.text "Your Club" }
+                            , E.link (highlightIfSelected (route.path == Route.Path.Edit)) { url = "/edit", label = E.text "Edit Profile" }
+                            ]
+                    )
                 ]
             , content.body
             ]
     }
+
+
+highlightIfSelected : Bool -> List (E.Attribute msg)
+highlightIfSelected selected =
+    if selected then
+        [ Border.widthEach { bottom = 4, top = 0, left = 0, right = 0 }
+        , Border.color red_500
+        , E.paddingXY 2 4
+        ]
+
+    else
+        [ Border.widthEach { bottom = 4, top = 0, left = 0, right = 0 }
+        , Border.color mono_800
+        , E.paddingXY 2 4
+        , E.mouseOver [ Border.color red_300 ]
+        ]

@@ -69,7 +69,7 @@ init shared () =
     case shared.loginStatus of
         Shared.Model.NotLoggedIn ->
             ( initial
-            , Effect.pushUrlPath "/"
+            , Effect.pushUrlPath "/login"
             )
 
         Shared.Model.LoggedIn { clubId, token } ->
@@ -307,7 +307,7 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Login"
+    { title = "Edit"
     , body =
         case model.info of
             Api.Loading ->

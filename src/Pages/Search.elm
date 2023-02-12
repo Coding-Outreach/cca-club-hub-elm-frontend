@@ -91,7 +91,7 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "search"
+    { title = "Search"
     , body =
         E.column [ E.padding 32, E.width E.fill, E.height E.fill, E.centerX ]
             [ Input.search

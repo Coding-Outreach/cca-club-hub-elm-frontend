@@ -10,6 +10,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
+import Html.Attributes
 import Http
 import Layout exposing (Layout)
 import Layouts
@@ -18,7 +19,6 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
-import Html.Attributes
 
 
 page : Shared.Model -> Route { clubId : String } -> Page Model Msg
@@ -150,7 +150,7 @@ view model =
                             , info.about
                                 |> Markdown.toHtml Nothing
                                 |> List.map E.html
-                                |> E.paragraph [ E.htmlAttribute (Html.Attributes.class "aboutMd")]
+                                |> E.paragraph [ E.htmlAttribute (Html.Attributes.class "aboutMd") ]
                             ]
                         , E.column
                             [ E.spacing 8

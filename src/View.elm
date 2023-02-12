@@ -14,8 +14,8 @@ module View exposing
 
 import Browser
 import Color exposing (..)
-import Route exposing (Route)
 import Element as E exposing (Element)
+import Route exposing (Route)
 import Shared.Model
 
 
@@ -48,7 +48,6 @@ toBrowserDocument { view } =
             []
             view.body
         ]
-
 
 
 {-| Used internally by Elm Land to connect your pages together.
