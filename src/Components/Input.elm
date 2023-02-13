@@ -111,4 +111,4 @@ label name =
 
 inputBoxStyles : List (E.Attribute msg)
 inputBoxStyles =
-    [ Bg.color mono_600, Border.width 2, Border.color mono_500 ]
+    [ Bg.color mono_600, Border.width 2, Border.rounded 6, Border.color mono_500 ]

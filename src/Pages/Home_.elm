@@ -4,6 +4,8 @@ import Api
 import Array exposing (Array)
 import Color exposing (..)
 import Components.Icon exposing (icon)
+import Components.ProfilePicture exposing (profilePicture)
+import Components.Rounded exposing (rounded)
 import Effect exposing (Effect)
 import Element as E exposing (el, text)
 import Element.Background as Bg
@@ -127,36 +129,38 @@ view model =
                             , Region.heading 1
                             ]
                             (E.text "Featured Clubs")
-                        , clubs
-                            |> Array.get model.index
-                            |> Maybe.map viewClub
-                            |> Maybe.withDefault (text "")
-                        , E.el [ E.height (E.px 20), Bg.color mono_600, E.width E.fill ]
-                            (E.row [ E.spacing 8, E.centerX ]
-                                (Array.indexedMap
-                                    (\i _ ->
-                                        E.el
-                                            [ E.height (E.px 12)
-                                            , E.width (E.px 12)
-                                            , Border.rounded 128
-                                            , if i == model.index then
-                                                Bg.color mono_400
+                        , E.column (rounded ++ [ E.width E.fill ])
+                            [ clubs
+                                |> Array.get model.index
+                                |> Maybe.map viewClub
+                                |> Maybe.withDefault E.none
+                            , E.el [ E.height (E.px 20), Bg.color mono_600, E.width E.fill ]
+                                (E.row [ E.spacing 8, E.centerX ]
+                                    (Array.indexedMap
+                                        (\i _ ->
+                                            E.el
+                                                [ E.height (E.px 12)
+                                                , E.width (E.px 12)
+                                                , Border.rounded 128
+                                                , if i == model.index then
+                                                    Bg.color mono_400
 
-                                              else
-                                                Border.color mono_200
-                                            , if i /= model.index then
-                                                Border.width 2
+                                                  else
+                                                    Border.color mono_200
+                                                , if i /= model.index then
+                                                    Border.width 2
 
-                                              else
-                                                Border.width 0
-                                            , Events.onClick (Select i)
-                                            ]
-                                            E.none
+                                                  else
+                                                    Border.width 0
+                                                , Events.onClick (Select i)
+                                                ]
+                                                E.none
+                                        )
+                                        clubs
+                                        |> Array.toList
                                     )
-                                    clubs
-                                    |> Array.toList
                                 )
-                            )
+                            ]
                         ]
                     ]
     }
@@ -165,7 +169,7 @@ view model =
 viewClub : Api.ClubInfo -> E.Element msg
 viewClub info =
     E.column [ E.width E.fill, E.height E.fill ]
-        [ el [ E.width E.fill, E.height (E.px 128), Bg.color red_100, E.padding 16 ] (text "")
+        [ el [ E.width E.fill, E.height (E.px 128), Bg.color red_100, E.padding 16 ] E.none
         , E.column
             [ E.width E.fill
             , E.height E.fill
@@ -176,7 +180,7 @@ viewClub info =
                 , bottom = 32
                 , left = 32
                 }
-            , E.above (viewProfilePicture info.profilePictureUrl info.clubName)
+            , E.above (profilePicture info.profilePictureUrl info.clubName)
             ]
             [ E.column [ E.spacing 12 ]
                 [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text info.clubName)
@@ -205,21 +209,3 @@ viewClub info =
                 ]
             ]
         ]
-
-
-viewProfilePicture : String -> String -> E.Element msg
-viewProfilePicture url clubName =
-    E.image
-        [ E.centerX
-        , Border.rounded 160
-        , E.clip
-        , E.width (E.px 160)
-        , E.height (E.px 160)
-        , E.alignLeft
-        , E.moveDown 64
-        , E.moveRight 32
-        , Bg.color mono_600
-        ]
-        { src = url
-        , description = clubName ++ "'s profile picture"
-        }

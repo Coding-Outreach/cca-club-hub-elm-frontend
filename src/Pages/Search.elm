@@ -4,6 +4,7 @@ import Api
 import Color exposing (..)
 import Components.Icon exposing (icon)
 import Components.Input as CInput
+import Components.Rounded
 import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
 import Element.Background as Bg
@@ -119,9 +120,11 @@ view model =
 
                     Api.Success list ->
                         Keyed.column
-                            [ E.width (E.fill |> E.maximum (16 * 48))
-                            , E.centerX
-                            ]
+                            (Components.Rounded.rounded
+                                ++ [ E.width (E.fill |> E.maximum (16 * 48))
+                                   , E.centerX
+                                   ]
+                            )
                             (List.map viewClubListing (getSearchResults list model.searchTerm))
                 ]
             ]
@@ -169,10 +172,10 @@ viewClubListing listing =
                     , E.height (E.px 96)
                     , E.alignLeft
                     ]
-                    { src = listing.profilePictureUrl
+                    { src = Api.backendUrl ++ listing.profilePictureUrl
                     , description = listing.clubName ++ "'s profile picture"
                     }
-                , E.column [ E.spacing 12 ]
+                , E.column [ E.spacing 12, E.width E.fill ]
                     [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text listing.clubName)
                     , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ listing.meetTime)) ]
                     , E.paragraph

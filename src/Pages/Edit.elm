@@ -337,7 +337,7 @@ view model =
                                     E.paragraph [ Font.color red_300 ] [ text (Api.errorToString err) ]
 
                                 Nothing ->
-                                    text ""
+                                    E.none
                             ]
                         ]
                     , CInput.text []
@@ -377,19 +377,19 @@ view model =
                         { onChange = FieldUpdate << Social << GoogleClassroom
                         , text = Maybe.withDefault "" info.socials.googleClassroom
                         , placeholder = Nothing
-                        , label = "GOOGLE CLASSROOM"
+                        , label = "GOOGLE CLASSROOM (invite link)"
                         }
                     , CInput.text []
                         { onChange = FieldUpdate << Social << Discord
                         , text = Maybe.withDefault "" info.socials.discord
                         , placeholder = Nothing
-                        , label = "DISCORD"
+                        , label = "DISCORD (https://discord.gg/club)"
                         }
                     , CInput.text []
                         { onChange = FieldUpdate << Social << Instagram
                         , text = Maybe.withDefault "" info.socials.instagram
                         , placeholder = Nothing
-                        , label = "INSTAGRAM"
+                        , label = "INSTAGRAM (https://instagram.com/club)"
                         }
                     , el [ Font.size 24, Font.bold ] (text "Tags")
                     , E.paragraph [ Font.color mono_300 ] [ text "Press enter to add a tag. Click one of the categories to remove them." ]
@@ -409,7 +409,7 @@ view model =
                         }
                     , E.wrappedRow [ E.spacing 8 ] (List.map viewCategory info.categories)
                     , CInput.button [] { onPress = Just Submit, label = text "Submit Changes" }
-                    , Maybe.withDefault (text "") (viewStatusMessage model.editStatus)
+                    , Maybe.withDefault E.none (viewStatusMessage model.editStatus)
                     , categoriesDatalist model.categories info.categories
                     ]
     }
