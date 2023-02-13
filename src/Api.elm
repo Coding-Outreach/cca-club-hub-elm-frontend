@@ -332,3 +332,54 @@ getCategories msg =
         { url = apiUrl ++ "/club/categories/list"
         , expect = expectJson msg (D.list D.string)
         }
+
+
+checkResetUrl : String -> (Result Http.Error () -> msg) -> Cmd msg
+checkResetUrl uid msg =
+    Http.get
+        { url = backendUrl ++ "/password/" ++ uid
+        , expect = Http.expectWhatever msg
+        }
+
+
+sendResetRequest : String -> (Result Http.Error () -> msg) -> Cmd msg
+sendResetRequest email msg =
+    Http.request
+        { method = "POST"
+        , headers =
+            [ Http.header "Access-Control-Allow-Headers" "Origin, Content-Type Access-Control-Allow-Headers"
+            ]
+        , url = backendUrl ++ "/password/reset"
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "email", E.string email ) ]
+                )
+        , expect = Http.expectWhatever msg
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+sendPasswordReset : String -> String -> (Result Http.Error () -> msg) -> Cmd msg
+sendPasswordReset clubId password msg =
+    Http.post
+        { url = backendUrl ++ "/password/" ++ clubId
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "password", E.string password ) ]
+                )
+        , expect = Http.expectWhatever msg
+        }
+
+
+
+-- Http.post
+--     { url = backendUrl ++ "/password/reset"
+--     , body = Http.jsonBody (
+--         E.object
+--             [ ( "email", E.string email ) ]
+--     )
+--     , expect = Http.expectWhatever msg
+--     }
