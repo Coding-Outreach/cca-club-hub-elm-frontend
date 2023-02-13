@@ -10,6 +10,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
+import Html.Attributes
 import Http
 import Layout exposing (Layout)
 import Layouts
@@ -57,7 +58,7 @@ init route () =
 
 
 type Msg
-    = GotResponse (Result Http.Error Api.ClubInfo)
+    = GotResponse (Result Api.Error Api.ClubInfo)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -105,15 +106,10 @@ view model =
                 el [ E.centerX, E.centerY ] (text "Loading...")
 
             Api.Failure err ->
-                case err of
-                    Http.BadStatus 404 ->
-                        E.column [ E.centerX, E.centerY ]
-                            [ text "Club not found!"
-                            , E.link [ Font.color red_300, Font.underline, E.centerX ] { url = "/", label = text "Go Back" }
-                            ]
-
-                    _ ->
-                        el [ E.centerX, E.centerY ] (text ("Something went wrong: " ++ Debug.toString err))
+                E.column [ E.centerX, E.centerY ]
+                    [ text (Api.errorToString err)
+                    , E.link [ Font.color red_300, Font.underline, E.centerX ] { url = "/", label = text "Go Back" }
+                    ]
 
             Api.Success info ->
                 E.column [ E.padding 32, E.width E.fill, E.height E.fill ]
@@ -154,7 +150,7 @@ view model =
                             , info.about
                                 |> Markdown.toHtml Nothing
                                 |> List.map E.html
-                                |> E.paragraph []
+                                |> E.paragraph [ E.htmlAttribute (Html.Attributes.class "aboutMd") ]
                             ]
                         , E.column
                             [ E.spacing 8
@@ -190,7 +186,7 @@ viewProfilePicture url clubName =
         , E.moveRight 32
         , Bg.color mono_600
         ]
-        { src = url
+        { src = Api.backendUrl ++ url
         , description = clubName ++ "'s profile picture"
         }
 

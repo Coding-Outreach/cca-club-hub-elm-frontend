@@ -1,6 +1,7 @@
 module Api exposing (..)
 
 import Array exposing (Array)
+import File exposing (File)
 import Http
 import Json.Decode as D
 import Json.Encode as E
@@ -10,7 +11,7 @@ import Jwt.Http
 type Status value
     = Loading
     | Success value
-    | Failure Http.Error
+    | Failure Error
 
 
 map : (a -> b) -> Status a -> Status b
@@ -37,9 +38,105 @@ withDefault default status =
             default
 
 
+type alias ResponseStatusError =
+    { status : Int, message : String }
+
+
+responseStatusErrorDecoder : D.Decoder ResponseStatusError
+responseStatusErrorDecoder =
+    D.map2 ResponseStatusError (D.field "status" D.int) (D.field "message" D.string)
+
+
+type Error
+    = BadUrl String
+    | Timeout
+    | NetworkError
+    | BadStatus ResponseStatusError
+    | BadBody String
+
+
+errorToString : Error -> String
+errorToString e =
+    case e of
+        BadUrl url ->
+            "Bad Url: " ++ url
+
+        BadStatus { status, message } ->
+            "Something went wrong: " ++ String.fromInt status ++ " " ++ message
+
+        BadBody error ->
+            "Failed to parse response: " ++ error
+
+        Timeout ->
+            "Timed Out"
+
+        NetworkError ->
+            "Network error"
+
+
+expectJson : (Result Error a -> msg) -> D.Decoder a -> Http.Expect msg
+expectJson toMsg decoder =
+    Http.expectStringResponse toMsg <|
+        \response ->
+            case response of
+                Http.BadUrl_ url ->
+                    Err (BadUrl url)
+
+                Http.Timeout_ ->
+                    Err Timeout
+
+                Http.NetworkError_ ->
+                    Err NetworkError
+
+                Http.BadStatus_ _ body ->
+                    case D.decodeString responseStatusErrorDecoder body of
+                        Ok value ->
+                            Err (BadStatus value)
+
+                        Err err ->
+                            Err (BadBody (D.errorToString err))
+
+                Http.GoodStatus_ _ body ->
+                    case D.decodeString decoder body of
+                        Ok value ->
+                            Ok value
+
+                        Err err ->
+                            Err (BadBody (D.errorToString err))
+
+
+expectWhatever : (Result Error () -> msg) -> Http.Expect msg
+expectWhatever toMsg =
+    Http.expectBytesResponse toMsg (resolve (\_ -> Ok ()))
+
+
+resolve : (body -> Result String a) -> Http.Response body -> Result Error a
+resolve toResult response =
+    case response of
+        Http.BadUrl_ url ->
+            Err (BadUrl url)
+
+        Http.Timeout_ ->
+            Err Timeout
+
+        Http.NetworkError_ ->
+            Err NetworkError
+
+        Http.BadStatus_ metadata _ ->
+            Err (BadStatus { status = metadata.statusCode, message = "unspecified" })
+
+        Http.GoodStatus_ _ body ->
+            Result.mapError BadBody (toResult body)
+
+
 backendUrl : String
 backendUrl =
-    "http://localhost:8080/api"
+    "http://localhost:8080/"
+
+
+apiUrl : String
+apiUrl =
+    backendUrl ++ "api"
 
 
 type alias LoginResponse =
@@ -47,12 +144,12 @@ type alias LoginResponse =
     }
 
 
-doLogin : String -> String -> (Result Http.Error LoginResponse -> msg) -> Cmd msg
+doLogin : String -> String -> (Result Error LoginResponse -> msg) -> Cmd msg
 doLogin username password msg =
     Http.post
         { body = Http.jsonBody (E.object [ ( "username", E.string username ), ( "password", E.string password ) ])
-        , url = backendUrl ++ "/auth/login"
-        , expect = Http.expectJson msg loginResponseDecoder
+        , url = apiUrl ++ "/auth/login"
+        , expect = expectJson msg loginResponseDecoder
         }
 
 
@@ -82,20 +179,34 @@ type alias Socials =
     }
 
 
-getClubInfo : String -> (Result Http.Error ClubInfo -> msg) -> Cmd msg
+getClubInfo : String -> (Result Error ClubInfo -> msg) -> Cmd msg
 getClubInfo id msg =
     Http.get
-        { url = backendUrl ++ "/club/info/" ++ id
-        , expect = Http.expectJson msg clubInfoDecoder
+        { url = apiUrl ++ "/club/info/" ++ id
+        , expect = expectJson msg clubInfoDecoder
         }
 
 
-doClubEdit : String -> ClubInfo -> (Result Http.Error () -> msg) -> Cmd msg
-doClubEdit token info msg =
+doUploadPfpDecoder : D.Decoder String
+doUploadPfpDecoder =
+    D.field "url" D.string
+
+
+doUploadPfp : String -> File -> (Result Error String -> msg) -> Cmd msg
+doUploadPfp token file toMsg =
+    Jwt.Http.put token
+        { body = Http.fileBody file
+        , url = apiUrl ++ "/edit/pfp"
+        , expect = expectJson toMsg doUploadPfpDecoder
+        }
+
+
+doClubEdit : String -> ClubInfo -> (Result Error () -> msg) -> Cmd msg
+doClubEdit token info toMsg =
     Jwt.Http.post token
         { body = Http.jsonBody (clubInfoEditEncoder info)
-        , url = backendUrl ++ "/edit/" ++ info.id
-        , expect = Http.expectWhatever msg
+        , url = apiUrl ++ "/edit/info"
+        , expect = expectWhatever toMsg
         }
 
 
@@ -189,11 +300,11 @@ clubListItemDecoder =
         (D.field "categories" (D.list D.string))
 
 
-getClubList : (Result Http.Error ClubListResponse -> msg) -> Cmd msg
+getClubList : (Result Error ClubListResponse -> msg) -> Cmd msg
 getClubList msg =
     Http.get
-        { url = backendUrl ++ "/club/list"
-        , expect = Http.expectJson msg clubListResponseDecoder
+        { url = apiUrl ++ "/club/list"
+        , expect = expectJson msg clubListResponseDecoder
         }
 
 
@@ -202,11 +313,11 @@ clubListResponseDecoder =
     D.list clubListItemDecoder
 
 
-getFeaturedClubList : (Result Http.Error FeaturedClubsResponse -> msg) -> Cmd msg
+getFeaturedClubList : (Result Error FeaturedClubsResponse -> msg) -> Cmd msg
 getFeaturedClubList msg =
     Http.get
-        { url = backendUrl ++ "/club/list/featured"
-        , expect = Http.expectJson msg featuredClubsResponseDecoder
+        { url = apiUrl ++ "/club/list/featured"
+        , expect = expectJson msg featuredClubsResponseDecoder
         }
 
 
@@ -215,11 +326,11 @@ featuredClubsResponseDecoder =
     D.array clubInfoDecoder
 
 
-getCategories : (Result Http.Error (List String) -> msg) -> Cmd msg
+getCategories : (Result Error (List String) -> msg) -> Cmd msg
 getCategories msg =
     Http.get
-        { url = backendUrl ++ "/club/categories/list"
-        , expect = Http.expectJson msg (D.list D.string)
+        { url = apiUrl ++ "/club/categories/list"
+        , expect = expectJson msg (D.list D.string)
         }
 
 

@@ -58,7 +58,7 @@ init () =
 
 type Msg
     = SearchTermChange String
-    | GotClubs (Result Http.Error Api.ClubListResponse)
+    | GotClubs (Result Api.Error Api.ClubListResponse)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -91,7 +91,7 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "search"
+    { title = "Search"
     , body =
         E.column [ E.padding 32, E.width E.fill, E.height E.fill, E.centerX ]
             [ Input.search

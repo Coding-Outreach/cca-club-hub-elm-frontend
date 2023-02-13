@@ -47,7 +47,7 @@ type alias Model =
     , categoryField : String
     , categories : Api.Status (List String)
     , token : String
-    , pfpTooBig : Bool
+    , badPfp : Maybe Api.Error
     , categoryInvalid : Bool
     , editStatus : Maybe (Api.Status ())
     }
@@ -62,14 +62,14 @@ init shared () =
             , categories = Api.Loading
             , categoryField = ""
             , editStatus = Nothing
-            , pfpTooBig = False
+            , badPfp = Nothing
             , categoryInvalid = False
             }
     in
     case shared.loginStatus of
         Shared.Model.NotLoggedIn ->
             ( initial
-            , Effect.pushUrlPath "/"
+            , Effect.pushUrlPath "/login"
             )
 
         Shared.Model.LoggedIn { clubId, token } ->
@@ -91,7 +91,6 @@ type Social
 
 type Field
     = ClubName String
-    | ProfilePictureUrl String
     | MeetTime String
     | Description String
     | About String
@@ -100,13 +99,14 @@ type Field
 
 
 type Msg
-    = GotInitialData (Result Http.Error Api.ClubInfo)
-    | GotCategories (Result Http.Error (List String))
+    = GotInitialData (Result Api.Error Api.ClubInfo)
+    | GotCategories (Result Api.Error (List String))
     | FieldUpdate Field
     | ProfilePictureRequested
     | ProfilePictureLoaded File
+    | ProfilePictureUpdated (Result Api.Error String)
     | Submit
-    | GotSubmit (Result Http.Error ())
+    | GotSubmit (Result Api.Error ())
     | AddCategory
     | DeleteCategory String
 
@@ -222,28 +222,30 @@ update msg model =
                 _ ->
                     ( model, Effect.none )
 
-        FieldUpdate (ProfilePictureUrl url) ->
-            let
-                size =
-                    String.length url
-            in
-            if size > 64000 then
-                ( { model | pfpTooBig = True }, Effect.none )
-
-            else
-                ( { model | pfpTooBig = False, info = Api.map (\m -> { m | profilePictureUrl = url }) model.info }
-                , Effect.warnUnsavedChanges True
-                )
-
         ProfilePictureRequested ->
             ( model
-            , Effect.sendCmd (Select.file [ "image/png", "image/jpeg", "image/webp" ] ProfilePictureLoaded)
+            , Effect.sendCmd (Select.file [ "image/*" ] ProfilePictureLoaded)
             )
 
         ProfilePictureLoaded file ->
             ( model
-            , Effect.sendCmd (Task.perform (FieldUpdate << ProfilePictureUrl) (File.toUrl file))
+            , Effect.sendCmd (Api.doUploadPfp model.token file ProfilePictureUpdated)
             )
+
+        ProfilePictureUpdated (Ok url) ->
+            case model.info of
+                Api.Success info ->
+                    let
+                        newInfo =
+                            { info | profilePictureUrl = url }
+                    in
+                    ( { model | info = Api.Success newInfo, badPfp = Nothing }, Effect.none )
+
+                _ ->
+                    ( model, Effect.none )
+
+        ProfilePictureUpdated (Err err) ->
+            ( { model | badPfp = Just err }, Effect.none )
 
         FieldUpdate field ->
             case model.info of
@@ -305,7 +307,7 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Login"
+    { title = "Edit"
     , body =
         case model.info of
             Api.Loading ->
@@ -330,13 +332,12 @@ view model =
                                 [ text "Upload a profile picture. Dimensions should be between 160x160 to 256x256."
                                 ]
                             , CInput.button [] { onPress = Just ProfilePictureRequested, label = text "Upload Image" }
-                            , if model.pfpTooBig then
-                                E.paragraph [ Font.color red_300 ]
-                                    [ text "Your profile picture is too big."
-                                    ]
+                            , case model.badPfp of
+                                Just err ->
+                                    E.paragraph [ Font.color red_300 ] [ text (Api.errorToString err) ]
 
-                              else
-                                text ""
+                                Nothing ->
+                                    text ""
                             ]
                         ]
                     , CInput.text []
@@ -487,7 +488,7 @@ viewProfilePicture url clubName =
         , E.height (E.px 128)
         , E.alignLeft
         ]
-        { src = url
+        { src = Api.backendUrl ++ url
         , description = clubName ++ "'s profile picture"
         }
 
@@ -517,11 +518,8 @@ viewStatusMessage =
                         Api.Success _ ->
                             "Club successfully updated!"
 
-                        Api.Failure (Http.BadStatus 400) ->
-                            "You are unauthorized! try relogging in"
-
                         Api.Failure err ->
-                            "Something went wrong: " ++ Debug.toString err
+                            Api.errorToString err
             in
             el [ Font.color color ] (text message)
         )

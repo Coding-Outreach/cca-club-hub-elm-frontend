@@ -1,7 +1,9 @@
 module Shared.Msg exposing (..)
 
 import Api
+import Jwt exposing (JwtError)
 
 
 type Msg
-    = Login Api.LoginResponse
+    = CheckTokenExired (Result JwtError Bool)
+    | Login Api.LoginResponse

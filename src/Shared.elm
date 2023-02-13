@@ -17,10 +17,12 @@ import Dict
 import Effect exposing (Effect)
 import Json.Decode as D
 import Json.Encode as E
+import Jwt
 import Route exposing (Route)
 import Route.Path
 import Shared.Model exposing (LoginStatus(..))
 import Shared.Msg exposing (Msg(..))
+import Task
 import Token
 
 
@@ -71,9 +73,17 @@ init flagsResult route =
 
                         Err _ ->
                             NotLoggedIn
+
+        effect =
+            case flags.token of
+                Nothing ->
+                    Effect.none
+
+                Just token ->
+                    Effect.sendCmd (Task.attempt CheckTokenExired (Jwt.checkTokenExpiry token))
     in
     ( { loginStatus = loginStatus }
-    , Effect.none
+    , effect
     )
 
 
@@ -88,6 +98,16 @@ type alias Msg =
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
+        CheckTokenExired (Ok expired) ->
+            if expired then
+                ( { model | loginStatus = NotLoggedIn }, Effect.none )
+
+            else
+                ( model, Effect.none )
+
+        CheckTokenExired (Err _) ->
+            ( { model | loginStatus = NotLoggedIn }, Effect.none )
+
         Login res ->
             case Token.getClubIdFromToken res.token of
                 Ok clubId ->
