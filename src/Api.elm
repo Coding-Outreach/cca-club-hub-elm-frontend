@@ -334,52 +334,35 @@ getCategories msg =
         }
 
 
-checkResetUrl : String -> (Result Http.Error () -> msg) -> Cmd msg
+checkResetUrl : String -> (Result Error () -> msg) -> Cmd msg
 checkResetUrl uid msg =
     Http.get
-        { url = backendUrl ++ "/password/" ++ uid
-        , expect = Http.expectWhatever msg
+        { url = apiUrl ++ "/password/check/" ++ uid
+        , expect = expectWhatever msg
         }
 
 
-sendResetRequest : String -> (Result Http.Error () -> msg) -> Cmd msg
+sendResetRequest : String -> (Result Error () -> msg) -> Cmd msg
 sendResetRequest email msg =
-    Http.request
-        { method = "POST"
-        , headers =
-            [ Http.header "Access-Control-Allow-Headers" "Origin, Content-Type Access-Control-Allow-Headers"
-            ]
-        , url = backendUrl ++ "/password/reset"
+    Http.post
+        { url = apiUrl ++ "/password/reset"
         , body =
             Http.jsonBody
                 (E.object
                     [ ( "email", E.string email ) ]
                 )
-        , expect = Http.expectWhatever msg
-        , timeout = Nothing
-        , tracker = Nothing
+        , expect = expectWhatever msg
         }
 
 
-sendPasswordReset : String -> String -> (Result Http.Error () -> msg) -> Cmd msg
-sendPasswordReset clubId password msg =
+sendPasswordReset : String -> String -> (Result Error () -> msg) -> Cmd msg
+sendPasswordReset uid password msg =
     Http.post
-        { url = backendUrl ++ "/password/" ++ clubId
+        { url = apiUrl ++ "/password/" ++ uid
         , body =
             Http.jsonBody
                 (E.object
                     [ ( "password", E.string password ) ]
                 )
-        , expect = Http.expectWhatever msg
+        , expect = expectWhatever msg
         }
-
-
-
--- Http.post
---     { url = backendUrl ++ "/password/reset"
---     , body = Http.jsonBody (
---         E.object
---             [ ( "email", E.string email ) ]
---     )
---     , expect = Http.expectWhatever msg
---     }

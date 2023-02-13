@@ -167,7 +167,7 @@ view model =
                 , label = "PASSWORD"
                 , show = model.showPassword
                 }
-            , E.link linkStyles { url = "/forgot-password", label = text "Forgot your password?" }
+            , E.link linkStyles { url = "/password/request", label = text "Forgot your password?" }
             , CInput.button [] { onPress = Just Submit, label = text "Login" }
             , el [ Font.color red_300 ] (text model.badLogin)
             ]

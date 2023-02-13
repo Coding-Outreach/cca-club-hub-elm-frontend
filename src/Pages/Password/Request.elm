@@ -1,4 +1,4 @@
-module Pages.ForgotPassword exposing (Model, Msg, page)
+module Pages.Password.Request exposing (Model, Msg, page)
 
 import Api
 import Components.Input as CInput
@@ -15,7 +15,7 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route () -> Page Model Msg
-page _ route =
+page _ _ =
     Page.new
         { init = init
         , update = update
@@ -27,14 +27,14 @@ page _ route =
 
 type alias Model =
     { email : Maybe String
-    , response : Maybe (Result Http.Error ())
+    , response : Maybe (Result Api.Error ())
     }
 
 
 type Msg
     = UpdateEmail String
     | Submit
-    | Response (Result Http.Error ())
+    | Response (Result Api.Error ())
 
 
 init : () -> ( Model, Effect Msg )
@@ -75,9 +75,9 @@ view model =
             Just (Ok _) ->
                 el [ E.centerX, E.centerY ] (text "Password reset request sent. Please check your email.")
 
-            Just (Err status) ->
+            Just (Err err) ->
                 el [ E.centerX, E.centerY ]
-                    (Debug.toString status
+                    (Api.errorToString err
                         |> text
                     )
 
@@ -96,6 +96,6 @@ view model =
                         , placeholder = Nothing
                         , label = "EMAIL"
                         }
-                    , CInput.button [] { onPress = Just Submit, label = text "Reset" }
+                    , CInput.button [] { onPress = Just Submit, label = text "Send request" }
                     ]
     }
