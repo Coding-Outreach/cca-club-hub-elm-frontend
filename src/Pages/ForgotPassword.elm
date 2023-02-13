@@ -7,7 +7,6 @@ import Element as E exposing (el, text)
 import Element.Font as Font
 import Element.Region as Region
 import Http
-import Layout exposing (Layout)
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)

@@ -1,7 +1,6 @@
 module Pages.PasswordReset exposing (Model, Msg, page)
 
 import Api
-import Array exposing (Array)
 import Color exposing (..)
 import Components.Icon exposing (icon)
 import Components.Input as CInput
@@ -9,16 +8,12 @@ import Effect exposing (Effect)
 import Element as E exposing (Element, el, text)
 import Element.Events as Events
 import Element.Font as Font
-import Element.Region as Region
 import Http
-import Layout exposing (Layout)
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
-import Set exposing (Set)
 import Shared
 import Shared.Model exposing (LoginStatus(..))
-import Token exposing (getClubIdFromToken)
 import View exposing (View)
 
 
