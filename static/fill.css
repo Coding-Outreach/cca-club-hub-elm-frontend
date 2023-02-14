@@ -1,3 +1,8 @@
+.aboutMd {
+    margin-top: 0;
+    flex-basis: auto !important;
+}
+
 .aboutMd a {
     color: #DE5D5D;
 }

@@ -157,9 +157,7 @@ view model =
                         ]
                     , E.row [ E.paddingXY 16 32, E.spacing 32, E.width E.fill ]
                         [ E.column
-                            [ E.spacing 8
-                            , E.width (E.fillPortion 4)
-                            ]
+                            [ E.width (E.fillPortion 4) ]
                             [ el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
                             , info.about
                                 |> Markdown.toHtml Nothing

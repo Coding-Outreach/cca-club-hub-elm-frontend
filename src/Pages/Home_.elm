@@ -168,44 +168,60 @@ view model =
 
 viewClub : Api.ClubInfo -> E.Element msg
 viewClub info =
-    E.column [ E.width E.fill, E.height E.fill ]
-        [ el [ E.width E.fill, E.height (E.px 128), Bg.color red_100, E.padding 16 ] E.none
-        , E.column
-            [ E.width E.fill
-            , E.height E.fill
-            , Bg.color mono_600
-            , E.paddingEach
-                { top = 80
-                , right = 32
-                , bottom = 32
-                , left = 32
-                }
-            , E.above (profilePicture info.profilePictureUrl info.clubName)
-            ]
-            [ E.column [ E.spacing 12 ]
-                [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text info.clubName)
-                , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ info.meetTime)) ]
-                ]
-            , E.column [ E.spacing 16 ]
-                [ E.paragraph
-                    [ E.paddingEach
-                        { top = 16
-                        , right = 0
-                        , bottom = 0
-                        , left = 0
+    E.link [ E.width E.fill, E.height E.fill ]
+        { url = "/club/" ++ info.id
+        , label =
+            E.column [ E.width E.fill, E.height E.fill ]
+                [ el [ E.width E.fill, E.height (E.px 128), Bg.color red_100, E.padding 16 ] E.none
+                , E.column
+                    [ E.width E.fill
+                    , E.height E.fill
+                    , Bg.color mono_600
+                    , E.paddingEach
+                        { top = 80
+                        , right = 32
+                        , bottom = 32
+                        , left = 32
                         }
-                    , E.spacing 8
+                    , E.above (profilePicture info.profilePictureUrl info.clubName)
                     ]
-                    [ text info.description ]
-                , el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
-                , info.about
-                    |> Markdown.toHtml Nothing
-                    |> List.map E.html
-                    |> E.paragraph
-                        [ E.htmlAttribute (Attr.style "text-overflow" "ellipsis")
-                        , E.htmlAttribute (Attr.style "overflow" "hidden")
-                        , E.height (E.fill |> E.maximum (16 * 3))
+                    [ E.column [ E.spacing 12 ]
+                        [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text info.clubName)
+                        , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ info.meetTime)) ]
                         ]
+                    , E.column [ E.spacing 16 ]
+                        [ E.paragraph
+                            [ E.paddingEach
+                                { top = 16
+                                , right = 0
+                                , bottom = 0
+                                , left = 0
+                                }
+                            , E.spacing 8
+                            ]
+                            [ text info.description ]
+                        , E.column []
+                            [ el [ Font.color mono_300, Font.size 12, Font.bold ] (text "ABOUT")
+                            , info.about
+                                |> Markdown.toHtml Nothing
+                                |> List.map E.html
+                                |> E.paragraph
+                                    [ E.htmlAttribute (Attr.style "text-overflow" "ellipsis")
+                                    , E.htmlAttribute (Attr.style "overflow" "hidden")
+                                    , E.htmlAttribute (Attr.class "aboutMd")
+                                    , E.height (E.fill |> E.maximum 96)
+                                    , E.inFront
+                                        (E.el
+                                            [ E.width E.fill
+                                            , E.height (E.px 24)
+                                            , Bg.gradient { angle = pi, steps = [ E.rgba 0 0 0 0, mono_600 ] }
+                                            , E.alignBottom
+                                            ]
+                                            E.none
+                                        )
+                                    ]
+                            ]
+                        ]
+                    ]
                 ]
-            ]
-        ]
+        }
