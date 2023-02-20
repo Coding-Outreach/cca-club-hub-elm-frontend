@@ -116,7 +116,7 @@ view model =
                         el [ E.centerX ] (text "Loading...")
 
                     Api.Failure err ->
-                        el [ E.centerX ] (text ("Oh no! Something went wrong: " ++ Debug.toString err))
+                        el [ E.centerX ] (text ("Oh no! Something went wrong: " ++ Api.errorToString err))
 
                     Api.Success list ->
                         Keyed.column

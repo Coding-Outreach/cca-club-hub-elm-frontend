@@ -314,7 +314,7 @@ view model =
                 el [ E.centerX, E.centerY ] (text "Loading...")
 
             Api.Failure err ->
-                el [ E.centerX, E.centerY ] (text ("Something went wrong: " ++ Debug.toString err))
+                el [ E.centerX, E.centerY ] (text ("Something went wrong: " ++ Api.errorToString err))
 
             Api.Success info ->
                 E.column [ E.padding 32, E.width (E.fill |> E.maximum (16 * 36)), E.height E.fill, E.centerX, E.spacing 16 ]

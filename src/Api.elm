@@ -107,10 +107,10 @@ expectJson toMsg decoder =
 
 expectWhatever : (Result Error () -> msg) -> Http.Expect msg
 expectWhatever toMsg =
-    Http.expectBytesResponse toMsg (resolve (\_ -> Ok ()))
+    Http.expectStringResponse toMsg (resolve (\_ -> Ok ()))
 
 
-resolve : (body -> Result String a) -> Http.Response body -> Result Error a
+resolve : (String -> Result String a) -> Http.Response String -> Result Error a
 resolve toResult response =
     case response of
         Http.BadUrl_ url ->
@@ -122,8 +122,13 @@ resolve toResult response =
         Http.NetworkError_ ->
             Err NetworkError
 
-        Http.BadStatus_ metadata _ ->
-            Err (BadStatus { status = metadata.statusCode, message = "unspecified" })
+        Http.BadStatus_ _ body ->
+            case D.decodeString responseStatusErrorDecoder body of
+                Ok value ->
+                    Err (BadStatus value)
+
+                Err err ->
+                    Err (BadBody (D.errorToString err))
 
         Http.GoodStatus_ _ body ->
             Result.mapError BadBody (toResult body)

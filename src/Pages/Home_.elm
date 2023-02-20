@@ -117,7 +117,7 @@ view model =
                 el [ E.centerX, E.centerY ] (text "Loading...")
 
             Api.Failure err ->
-                el [ E.centerX, E.centerY ] (text ("Oh no! Something went wrong: " ++ Debug.toString err))
+                el [ E.centerX, E.centerY ] (text ("Oh no! Something went wrong: " ++ Api.errorToString err))
 
             Api.Success clubs ->
                 E.column [ E.padding 32, E.width E.fill, E.height E.fill ]
