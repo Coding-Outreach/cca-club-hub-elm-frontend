@@ -136,7 +136,7 @@ resolve toResult response =
 
 backendUrl : String
 backendUrl =
-    "http://localhost:8080/"
+    "https://cca-club-hub-backend.fly.dev/"
 
 
 apiUrl : String
