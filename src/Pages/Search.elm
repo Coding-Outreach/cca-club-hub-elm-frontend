@@ -29,7 +29,7 @@ page shared route =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = view shared
         }
         |> Page.withLayout (\_ -> Layouts.Navbar { navbar = {} })
 
@@ -40,16 +40,13 @@ page shared route =
 
 type alias Model =
     { searchTerm : String
-    , clubs : Api.Status Api.ClubListResponse
     }
 
 
 init : () -> ( Model, Effect Msg )
 init () =
-    ( { searchTerm = ""
-      , clubs = Api.Loading
-      }
-    , Effect.sendCmd (Api.getClubList GotClubs)
+    ( { searchTerm = "" }
+    , Effect.none
     )
 
 
@@ -59,7 +56,6 @@ init () =
 
 type Msg
     = SearchTermChange String
-    | GotClubs (Result Api.Error Api.ClubListResponse)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -69,12 +65,6 @@ update msg model =
             ( { model | searchTerm = searchTerm }
             , Effect.none
             )
-
-        GotClubs (Err err) ->
-            ( { model | clubs = Api.Failure err }, Effect.none )
-
-        GotClubs (Ok list) ->
-            ( { model | clubs = Api.Success list }, Effect.none )
 
 
 
@@ -90,8 +80,8 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Search"
     , body =
         E.column [ E.padding 32, E.width E.fill, E.height E.fill, E.centerX ]
@@ -111,7 +101,7 @@ view model =
                         (E.text "Search for clubs:")
                 }
             , E.column [ E.paddingXY 0 16, E.width E.fill ]
-                [ case model.clubs of
+                [ case shared.clubs of
                     Api.Loading ->
                         el [ E.centerX ] (text "Loading...")
 

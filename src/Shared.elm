@@ -82,8 +82,8 @@ init flagsResult route =
                 Just token ->
                     Effect.sendCmd (Task.attempt CheckTokenExired (Jwt.checkTokenExpiry token))
     in
-    ( { loginStatus = loginStatus }
-    , effect
+    ( { loginStatus = loginStatus, clubs = Api.Loading }
+    , Effect.batch [ effect, Effect.sendCmd (Api.getClubList GotClubs) ]
     )
 
 
@@ -107,6 +107,12 @@ update route msg model =
 
         CheckTokenExired (Err _) ->
             ( { model | loginStatus = NotLoggedIn }, Effect.none )
+
+        GotClubs (Ok list) ->
+            ( { model | clubs = Api.Success list }, Effect.none )
+
+        GotClubs (Err err) ->
+            ( { model | clubs = Api.Failure err }, Effect.none )
 
         Login res ->
             case Token.getClubIdFromToken res.token of
