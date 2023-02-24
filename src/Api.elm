@@ -6,6 +6,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E
 import Jwt.Http
+import Env
 
 
 type Status value
@@ -136,7 +137,7 @@ resolve toResult response =
 
 backendUrl : String
 backendUrl =
-    "https://cca-club-hub-backend.fly.dev/"
+    Env.backendUrl
 
 
 apiUrl : String

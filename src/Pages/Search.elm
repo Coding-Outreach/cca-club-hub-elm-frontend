@@ -21,6 +21,7 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Shared
 import View exposing (View)
+import Components.ClubListing
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -109,13 +110,7 @@ view shared model =
                         el [ E.centerX ] (text ("Oh no! Something went wrong: " ++ Api.errorToString err))
 
                     Api.Success list ->
-                        Keyed.column
-                            (Components.Rounded.rounded
-                                ++ [ E.width (E.fill |> E.maximum (16 * 48))
-                                   , E.centerX
-                                   ]
-                            )
-                            (List.map viewClubListing (getSearchResults list model.searchTerm))
+                        Components.ClubListing.listings (getSearchResults list model.searchTerm)
                 ]
             ]
     }
@@ -145,39 +140,3 @@ scoreSearchTerm searchTerm club =
         (String.toLower searchTerm)
         (String.toLower (club.clubName ++ club.description ++ club.meetTime))
         |> .score
-
-
-viewClubListing : Api.ClubListItem -> ( String, Element msg )
-viewClubListing listing =
-    ( listing.id
-    , E.link [ E.width E.fill, Bg.color mono_600 ]
-        { url = "/club/" ++ listing.id
-        , label =
-            E.row [ E.padding 16, E.spacing 16 ]
-                [ E.image
-                    [ E.centerX
-                    , Border.rounded 96
-                    , E.clip
-                    , E.width (E.px 96)
-                    , E.height (E.px 96)
-                    , E.alignLeft
-                    ]
-                    { src = Api.backendUrl ++ listing.profilePictureUrl
-                    , description = listing.clubName ++ "'s profile picture"
-                    }
-                , E.column [ E.spacing 12, E.width E.fill ]
-                    [ el [ Font.bold, Font.size 32, Region.heading 1 ] (text listing.clubName)
-                    , E.row [ Font.color mono_100 ] [ icon "fa-regular fa-clock", el [] (text (" " ++ listing.meetTime)) ]
-                    , E.paragraph
-                        [ E.paddingEach
-                            { top = 8
-                            , right = 0
-                            , bottom = 0
-                            , left = 0
-                            }
-                        ]
-                        [ text listing.description ]
-                    ]
-                ]
-        }
-    )
