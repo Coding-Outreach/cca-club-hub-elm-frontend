@@ -130,6 +130,8 @@ update route msg model =
 
                 Err _ ->
                     ( { model | loginStatus = NotLoggedIn }, Effect.none )
+        Logout ->
+            ({ model | loginStatus = NotLoggedIn }, Effect.pushUrlPath "/")
 
 
 

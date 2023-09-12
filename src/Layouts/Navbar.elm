@@ -5,7 +5,9 @@ import Effect exposing (Effect)
 import Element as E exposing (Element)
 import Element.Background as Bg
 import Element.Border as Border
+import Element.Events as Events
 import Element.Font as Font
+import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes exposing (class)
 import Layout exposing (Layout)
@@ -13,6 +15,7 @@ import Route exposing (Route)
 import Route.Path
 import Shared
 import Shared.Model exposing (LoginStatus(..))
+import Shared.Msg
 import View exposing (View)
 
 
@@ -50,15 +53,15 @@ init _ =
 
 
 type Msg
-    = ReplaceMe
+    = Logout
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        ReplaceMe ->
+        Logout ->
             ( model
-            , Effect.none
+            , Effect.sendSharedMsg Shared.Msg.Logout
             )
 
 
@@ -107,6 +110,7 @@ view shared route { fromMsg, model, content } =
                             [ E.link (highlightIfSelected (route.path == Route.Path.Club_ClubId_ { clubId = clubId }))
                                 { url = "/club/" ++ clubId, label = E.text "Your Club" }
                             , E.link (highlightIfSelected (route.path == Route.Path.Edit)) { url = "/edit", label = E.text "Edit Profile" }
+                            , Input.button (highlightIfSelected False) { label = E.text "Logout", onPress = Logout |> fromMsg |> Just }
                             ]
                     )
                 ]
