@@ -22,6 +22,7 @@ import Shared
 import Shared.Model
 import Shared.Msg
 import View exposing (View)
+import Route exposing (Route)
 
 
 page : Shared.Model -> Route () -> Page Model Msg

@@ -20,9 +20,11 @@ import Json.Decode as D
 import Layout exposing (Layout)
 import Layouts
 import Page exposing (Page)
+import QRCode
 import Route exposing (Route)
 import Shared
 import Shared.Model exposing (LoginStatus(..))
+import Svg.Attributes
 import Task
 import View exposing (View)
 
@@ -391,6 +393,13 @@ view model =
                         , placeholder = Nothing
                         , label = "INSTAGRAM (https://instagram.com/club)"
                         }
+                    , E.row [ E.spacing 16 ]
+                        [ el [ Bg.color Color.white ] (qrCode ("https://clubs.ccaasb.com/club/" ++ info.id))
+                        , E.column [ E.width E.fill, E.height E.fill, E.spacing 16 ]
+                            [ E.paragraph [ Font.color mono_300 ]
+                                [ text "This is the QR Code with a link to your Club Page! You can use your club page as a hub for all your information." ]
+                            ]
+                        ]
                     , el [ Font.size 24, Font.bold ] (text "Tags")
                     , E.paragraph [ Font.color mono_300 ] [ text "Press enter to add a tag. Click one of the categories to remove them." ]
                     , CInput.text
@@ -413,6 +422,19 @@ view model =
                     , categoriesDatalist model.categories info.categories
                     ]
     }
+
+
+qrCode : String -> E.Element msg
+qrCode message =
+    QRCode.fromString message
+        |> Result.map
+            (QRCode.toSvg
+                [ Svg.Attributes.width "128px"
+                , Svg.Attributes.height "128px"
+                ]
+            )
+        |> Result.map E.html
+        |> Result.withDefault (text "Error while encoding to QRCode.")
 
 
 viewCategory : String -> E.Element Msg
