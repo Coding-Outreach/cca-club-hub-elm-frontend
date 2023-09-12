@@ -1,20 +1,21 @@
 module Components.ClubListing exposing (listing, listings)
 
 import Api
+import Color exposing (..)
+import Components.Icon exposing (..)
+import Components.Rounded
 import Element as E exposing (Element, el, text)
 import Element.Background as Bg
-import Color exposing (..)
 import Element.Border as Border
 import Element.Font as Font
-import Element.Region as Region
-import Components.Icon exposing (..)
 import Element.Keyed as Keyed
-import Components.Rounded
+import Element.Region as Region
+
 
 listing : Api.ClubListItem -> ( String, Element msg )
 listing item =
     ( item.id
-    , E.link [ E.width E.fill, Bg.color mono_600 ]
+    , E.link (Components.Rounded.rounded ++ [ E.width E.fill, Bg.color mono_600 ])
         { url = "/club/" ++ item.id
         , label =
             E.row [ E.padding 16, E.spacing 16 ]
@@ -48,10 +49,10 @@ listing item =
 
 
 listings : List Api.ClubListItem -> Element msg
-listings items =                         Keyed.column
-                            (Components.Rounded.rounded
-                                ++ [ E.width (E.fill |> E.maximum (16 * 48))
-                                   , E.centerX
-                                   ]
-                            )
-                            (List.map listing (items))
+listings items =
+    Keyed.column
+        [ E.width (E.fill |> E.maximum (16 * 48))
+        , E.centerX
+        , E.spacing 16
+        ]
+        (List.map listing items)
