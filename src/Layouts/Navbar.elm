@@ -85,8 +85,7 @@ view shared route { fromMsg, model, content } =
             , Font.color white
             , Font.size 16
             ]
-            [ E.el [ E.centerX, Bg.color red_500, Font.extraBold, E.width E.fill, Font.center ] (E.text "THIS IS CURRENTLY IN BETA, ALL CHANGES WILL BE RESET ON FRIDAY SEPT 15")
-            , E.row
+            [ E.row
                 [ Bg.color mono_800
                 , E.spacing 16
                 , E.paddingXY 32 16
